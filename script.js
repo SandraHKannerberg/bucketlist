@@ -11,13 +11,14 @@ const bucketList = [];
 const bucketListsElem = document.getElementById("bucketLists");
 const activityInput = document.getElementById("activityName");
 const activityCategorySelect = document.getElementById("activityCategory");
-// const registerForm = document.querySelector("#bucketForm");
+const registerForm = document.querySelector("#bucketForm");
 const ulElem = document.querySelector("#bucketList");
-const submitBtnElem = document.querySelector(".submitBtn");
 
 // Eventlyssnare
-submitBtnElem.addEventListener("click", addNewActivityToBucketList);
-// registerForm.addEventListener("submit", addNewActivityToBucketList);
+registerForm.addEventListener("submit", (event) => {
+  event.preventDefault(); // Förhindra att sidan laddas om
+  addNewActivityToBucketList(); // Kör funktionen för att lägga till aktiviteten i bucketList
+});
 
 renderBucketList();
 
@@ -64,7 +65,6 @@ function renderBucketList() {
   bucketList.forEach((activity) => {
     // Ny li för varje aktivitet
     const newListItemElem = document.createElement("li");
-    console.log("Från funktion renderBucketList: ", activity);
 
     // Ett p-element för att skriva ut beskrivningen
     const newActivityNameElem = document.createElement("p");
@@ -103,17 +103,15 @@ function renderBucketList() {
 // ------------------------------------------------------------
 
 function addNewActivityToBucketList() {
-  // event.preventDefault();
-
+  // Skapa objektet
   const activity = {
     description: activityInput.value,
     category: activityCategorySelect.value,
     isDone: false,
   };
 
+  // Lägg till det nya objektet i listan
   bucketList.push(activity);
-
-  console.log(bucketList);
 
   // Återställ formulären
   activityInput.value = "";
