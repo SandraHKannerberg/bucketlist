@@ -16,12 +16,13 @@ renderBucketList();
 // Skapa ett nytt ul-element för varje kategori som finns med
 // Ge varje ul en h2 med kategorin som rubrik
 
-function printActivityCategories(bucketList) {
+function printActivityCategories(bucketListInLocalStorage) {
+  bucketListsElem.innerHTML = "";
   // Skapa en uppsättning för att lagra unika kategorier
   const categories = new Set();
 
   // Loopar igenom aktiviteterna
-  bucketList.forEach((activity) => {
+  bucketListInLocalStorage.forEach((activity) => {
     if (activity.category) {
       categories.add(activity.category); // Lägg till kategorin i setet
     }
@@ -36,27 +37,55 @@ function printActivityCategories(bucketList) {
 
     // Skapa och lägg till en ul för varje kategori. Dessa ska sedan lista alla aktiviteter inom varje kategori
     const newUl = document.createElement("ul");
-    newUl.className = category;
+
+    // Översätter de svenska kategorierna till engelska då jag vill ha min className på engelska
+    const categoryTranslations = {
+      resor: "trips",
+      äventyr: "adventures",
+      lärande: "learning",
+      hobby: "hobby",
+      hemmafix: "renovation",
+    };
+
+    const englishClassName =
+      categoryTranslations[category.toLowerCase()] || "unknown";
+
+    // Tilldelar det engelska className till de nya listorna som skapas
+    newUl.className = englishClassName;
+
+    // Lägger till listan i DOM:en
     bucketListsElem.appendChild(newUl);
   });
 }
 
-// printActivityCategories(bucketList);
-
 // Skapa en funktion som ritar upp listan dynamiskt i DOM ----------------------------------------------------
 function renderBucketList() {
-  // Steg 2 få in dessa istället när bucketList finns i localStorage
-  // const bucketList = JSON.parse(localStorage.getItem("bucketList"));
-  // if (bucketList) {FLYTTA UPP KODBLOCKET FÖR RENDERING HIT}
-
   ulElem.innerHTML = "";
 
   const bucketListInLocalStorage = JSON.parse(
     localStorage.getItem("bucketListInLocalStorage")
   );
 
+  printActivityCategories(bucketListInLocalStorage);
+
+  const categoryTranslations = {
+    resor: "trips",
+    äventyr: "adventures",
+    lärande: "learning",
+    hobby: "hobby",
+    hemmafix: "renovation",
+  };
+
   if (bucketListInLocalStorage) {
     bucketListInLocalStorage.forEach((activity) => {
+      //Översätt kategorierna
+      const translatedCategory =
+        categoryTranslations[activity.category.toLowerCase()];
+
+      // Hitta UL-elementet baserat på den översatta kategorin
+      const newUlElem = document.querySelector(`ul.${translatedCategory}`);
+      console.log(newUlElem);
+
       // Ny li för varje aktivitet
       const newListItemElem = document.createElement("li");
 
@@ -129,8 +158,8 @@ function renderBucketList() {
         );
       });
 
-      // Lägg till aktiviteten/ nytt listItem i UL
-      ulElem.appendChild(newListItemElem);
+      // Lägg till aktiviteten/ nytt listItem i den listan med rätt kategori för aktiviteten
+      newUlElem.appendChild(newListItemElem);
       // --------------------------------------------------------
     });
   }
