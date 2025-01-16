@@ -10,6 +10,7 @@ const bucketListsElem = document.getElementById("bucketLists");
 const activityInput = document.getElementById("activityName");
 const activityCategorySelect = document.getElementById("activityCategory");
 const registerForm = document.querySelector("#bucketForm");
+const bodyElem = document.querySelector("body");
 
 // ------------------------------------------------------------------------------
 
@@ -146,10 +147,15 @@ function renderBucketList() {
         const index = bucketListInLocalStorage.indexOf(activity);
 
         // Redigera modalen ---------------------------------
+        // Skapa modalens bakgrund (overlay)
+        const modalOverlay = document.createElement("div");
+        modalOverlay.className = "modal-overlay";
+        bodyElem.appendChild(modalOverlay); // Lägg till i bodyn
+
+        // Skapa modalen
         const editModal = document.createElement("div");
         editModal.className = "editModal";
-        // Flytta till ett annat element sen
-        bucketListsElem.appendChild(editModal);
+        modalOverlay.appendChild(editModal); // Lägg till i modaleOverlay div:en
 
         // Titel
         const modalTitle = document.createElement("h3");
@@ -165,6 +171,7 @@ function renderBucketList() {
         const editActivityInput = document.createElement("input");
         editActivityInput.id = "activityName";
         editActivityInput.type = "text";
+        editActivityInput.placeholder = activity.description; // Default nuvarande värde
         editModal.appendChild(editActivityInput);
 
         // Skapa en dropdown för kategori
@@ -182,7 +189,18 @@ function renderBucketList() {
           const option = document.createElement("option");
           option.value = category;
           option.textContent = category;
+          option.defaultSelected = activity.category; // Default nuvarande värde
           categorySelect.appendChild(option);
+        });
+
+        // Lägg till en knapp för att stänga modalen
+        const closeButton = document.createElement("button");
+        closeButton.textContent = "Stäng";
+        editModal.appendChild(closeButton);
+
+        // Funktion för att stänga modalen
+        closeButton.addEventListener("click", () => {
+          modalOverlay.remove();
         });
 
         // Skapa en knapp för att spara ändringar
@@ -201,6 +219,9 @@ function renderBucketList() {
             "bucketListInLocalStorage",
             JSON.stringify(bucketListInLocalStorage)
           );
+
+          // Stäng modalen när ändringar är sparade
+          modalOverlay.remove();
 
           // Rendera ut bucket list igen för att få en uppdaterad version
           renderBucketList();
