@@ -3,13 +3,20 @@
 
 // const bucketList = [];
 
+// ---------------------------------------------------------------------------------
+
 // Variabler jag behöver fånga upp från HTML
 const bucketListsElem = document.getElementById("bucketLists");
 const activityInput = document.getElementById("activityName");
 const activityCategorySelect = document.getElementById("activityCategory");
 const registerForm = document.querySelector("#bucketForm");
 
+// ------------------------------------------------------------------------------
+
+// Kör funktion för att rendera ut bucket list direkt när sidan öppnas / laddas om
 renderBucketList();
+
+// ----------------------------------------------------------------------------
 
 // Funktion som får fram vilka kategorier som finns med i listan
 function printActivityCategories(bucketListInLocalStorage) {
@@ -61,15 +68,21 @@ function printActivityCategories(bucketListInLocalStorage) {
   });
 }
 
-// Skapa en funktion som ritar upp listan dynamiskt i DOM ----------------------------------------------------
+// -----------------------------------------------------------------------------
+
+// Skapa en funktion som ritar upp listan dynamiskt i DOM
 function renderBucketList() {
-  // Hämta listan från locla storage
+  // Hämta listan från local storage och spara i en variabel
   const bucketListInLocalStorage = JSON.parse(
     localStorage.getItem("bucketListInLocalStorage")
   );
 
-  // Kör funktionen för att kolla kategorier
-  printActivityCategories(bucketListInLocalStorage);
+  if (!bucketListInLocalStorage) {
+    console.log("Inget att visa");
+  } else {
+    // Kör funktionen för att kolla kategorier
+    printActivityCategories(bucketListInLocalStorage);
+  }
 
   // Översätt kategorierna
   const categoryTranslations = {
@@ -122,6 +135,78 @@ function renderBucketList() {
         renderBucketList();
       });
 
+      // En knapp för att redigera aktiviteten
+      const newBtnElemEdit = document.createElement("button");
+      newBtnElemEdit.textContent = "Redigera";
+      newListItemElem.appendChild(newBtnElemEdit);
+
+      // Eventlyssnare på Redigera-knappen denna ska egentligen bara öppna modalen för att ändra. Ändringarna sparas först när Spara-knappen triggas
+      newBtnElemEdit.addEventListener("click", () => {
+        // Vilket index har aktiviteten jag vill redigera?
+        const index = bucketListInLocalStorage.indexOf(activity);
+
+        // Redigera modalen ---------------------------------
+        const editModal = document.createElement("div");
+        editModal.className = "editModal";
+        // Flytta till ett annat element sen
+        bucketListsElem.appendChild(editModal);
+
+        // Titel
+        const modalTitle = document.createElement("h3");
+        modalTitle.textContent = "Redigera aktivitet";
+        editModal.appendChild(modalTitle);
+
+        // Skapa inputfält för beskrivning
+        const editActivityLabel = document.createElement("label");
+        editActivityLabel.setAttribute("for", "activityName");
+        editActivityLabel.textContent = "Vad vill du göra?";
+        editModal.appendChild(editActivityLabel);
+
+        const editActivityInput = document.createElement("input");
+        editActivityInput.id = "activityName";
+        editActivityInput.type = "text";
+        editModal.appendChild(editActivityInput);
+
+        // Skapa en dropdown för kategori
+        const editCategoryLabel = document.createElement("label");
+        editCategoryLabel.setAttribute("for", "category");
+        editCategoryLabel.textContent = "Välj kategori:";
+        editModal.appendChild(editCategoryLabel);
+
+        const categorySelect = document.createElement("select");
+        categorySelect.id = "category";
+        editModal.appendChild(categorySelect);
+
+        const categories = ["Resor", "Äventyr", "Lärande", "Hobby", "Hemmafix"];
+        categories.forEach((category) => {
+          const option = document.createElement("option");
+          option.value = category;
+          option.textContent = category;
+          categorySelect.appendChild(option);
+        });
+
+        // Skapa en knapp för att spara ändringar
+        const saveButton = document.createElement("button");
+        saveButton.textContent = "Spara";
+        editModal.appendChild(saveButton);
+
+        saveButton.addEventListener("click", () => {
+          const editInputValue = editActivityInput.value;
+          activity.description = editInputValue;
+
+          const editSelectValue = categorySelect.value;
+          activity.category = editSelectValue;
+
+          localStorage.setItem(
+            "bucketListInLocalStorage",
+            JSON.stringify(bucketListInLocalStorage)
+          );
+
+          // Rendera ut bucket list igen för att få en uppdaterad version
+          renderBucketList();
+        });
+      });
+
       // En knapp för att klarmarkera aktiviteten
       const newBtnElemDone = document.createElement("button");
       newListItemElem.appendChild(newBtnElemDone);
@@ -164,6 +249,8 @@ function renderBucketList() {
     });
   }
 }
+
+// --------------------------------------------------------------------------------
 
 // Lägg till en eventlyssnare på formuläret för att lägga till nya aktiviteter
 
@@ -208,6 +295,8 @@ function addNewActivityToBucketList() {
   renderBucketList();
 }
 
+// --------------------------------------------------------------------------------
+
 // Sortera aktiviteterna i varje lista i bokstavsordning
 function sortActivitiesAlphabetically() {
   // Hämta alla ul-element
@@ -218,10 +307,10 @@ function sortActivitiesAlphabetically() {
     // Konverterar resultatet från en NodeList till en array. På den kan sedan sort användas
     const listItems = Array.from(ul.querySelectorAll("li"));
 
-    // Sortera li-elementen i bokstavsordning
+    // Sortera aktiviteterna i bokstavsordning
     listItems.sort((a, b) => a.textContent.localeCompare(b.textContent));
 
-    // Omorganisera li-elementen i ul
+    // Omorganisera li-elementen/aktiviteterna i ul
     listItems.forEach((li) => ul.appendChild(li));
   });
 }
