@@ -77,7 +77,7 @@ function printActivityCategories(bucketList) {
 printActivityCategories(bucketList);
 
 // Skapa en funktion som ritar upp listan dynamiskt i DOM ----------------------------------------------------
-function renderMyBucketList() {
+function renderBucketList() {
   bucketList.forEach((activity) => {
     // Här skapas ett nytt ul-element utifrån className = aktuell kategori
     const newUlElemByActivityCategory = document.querySelector(
@@ -107,7 +107,7 @@ function renderMyBucketList() {
   });
 }
 
-renderMyBucketList();
+renderBucketList();
 
 // Lägg till en eventlyssnare på formuläret för att lägga till nya aktiviteter
 
