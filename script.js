@@ -1,5 +1,6 @@
 // Starta med en tom array som håller alla aktiviteter
-const bucketList = [];
+// Behöver inte denna då jag gått vidare till uppgiften på Level ups nivå med localStorage, så min lista sparas där och det är den jag utgår ifrån
+// const bucketList = [];
 
 // Variabler jag behöver fånga upp från HTML
 const bucketListsElem = document.getElementById("bucketLists");
@@ -50,57 +51,89 @@ function renderBucketList() {
 
   ulElem.innerHTML = "";
 
-  bucketList.forEach((activity) => {
-    // Ny li för varje aktivitet
-    const newListItemElem = document.createElement("li");
+  const bucketListInLocalStorage = JSON.parse(
+    localStorage.getItem("bucketListInLocalStorage")
+  );
 
-    // Ett p-element för att skriva ut beskrivningen
-    const newActivityNameElem = document.createElement("p");
-    newActivityNameElem.textContent = activity.description;
-    newListItemElem.appendChild(newActivityNameElem);
+  if (bucketListInLocalStorage) {
+    bucketListInLocalStorage.forEach((activity) => {
+      // Ny li för varje aktivitet
+      const newListItemElem = document.createElement("li");
 
-    // Ett p-element för att skriva ut kategorin
-    const newCategoryElem = document.createElement("p");
-    newCategoryElem.textContent = activity.category;
-    newListItemElem.appendChild(newCategoryElem);
+      // Ett p-element för att skriva ut beskrivningen
+      const newActivityNameElem = document.createElement("p");
+      newActivityNameElem.textContent = activity.description;
+      newListItemElem.appendChild(newActivityNameElem);
 
-    // En knapp för att ta bort aktiviteten från listan
-    const newBtnElemDel = document.createElement("button");
-    newBtnElemDel.textContent = "Ta bort";
-    newListItemElem.appendChild(newBtnElemDel);
+      // Ett p-element för att skriva ut kategorin
+      const newCategoryElem = document.createElement("p");
+      newCategoryElem.textContent = activity.category;
+      newListItemElem.appendChild(newCategoryElem);
 
-    // Eventlyssnare på Ta bort-knappen
-    newBtnElemDel.addEventListener("click", () => {
-      // Vilket index har aktiviteten jag vill ta bort?
-      const index = bucketList.indexOf(activity);
+      // En knapp för att ta bort aktiviteten från listan
+      const newBtnElemDel = document.createElement("button");
+      newBtnElemDel.textContent = "Ta bort";
+      newListItemElem.appendChild(newBtnElemDel);
 
-      // Ta bort aktiviteten
-      bucketList.splice(index, 1);
+      // Eventlyssnare på Ta bort-knappen
+      newBtnElemDel.addEventListener("click", () => {
+        // Vilket index har aktiviteten jag vill ta bort?
+        const index = bucketListInLocalStorage.indexOf(activity);
+        console.log(index);
 
-      // Rendera om bucket list för att få en uppdaterad version
-      renderBucketList();
+        // Ta bort aktiviteten och uppdatera listan i LS
+        bucketListInLocalStorage.splice(index, 1);
+
+        localStorage.setItem(
+          "bucketListInLocalStorage",
+          JSON.stringify(bucketListInLocalStorage)
+        );
+
+        // Rendera om bucket list för att få en uppdaterad version
+        renderBucketList();
+      });
+
+      // En knapp för att klarmarkera aktiviteten
+      const newBtnElemDone = document.createElement("button");
+      newListItemElem.appendChild(newBtnElemDone);
+
+      // Dynamiskt innehåll på knappen beroende på om aktiviteten är markerad som isDone eller inte. Klar visas när isDone = false, isDone = true visar checkmark istället.
+      if (!activity.isDone) {
+        newBtnElemDone.textContent = "Klar";
+      } else {
+        newBtnElemDone.innerHTML = "<i class='fa fa-check'></i>";
+        newActivityNameElem.style.textDecoration = "line-through";
+        newCategoryElem.style.textDecoration = "line-through";
+      }
+
+      // Eventlyssnare på Klarmarkera-knappen
+      newBtnElemDone.addEventListener("click", () => {
+        // Kolla värdet på isDone
+        // Ska gå att klicka igenom man klarmarkerat av misstag, och så knappen och texten återgå till ursprunglig text och style
+        if (activity.isDone) {
+          activity.isDone = false;
+          newBtnElemDone.textContent = "Klar";
+          newActivityNameElem.style.textDecoration = "none";
+          newCategoryElem.style.textDecoration = "none";
+        } else {
+          activity.isDone = true;
+          newActivityNameElem.style.textDecoration = "line-through";
+          newCategoryElem.style.textDecoration = "line-through";
+          newBtnElemDone.innerHTML = "<i class='fa fa-check'></i>";
+        }
+
+        // Uppdatera listan i LS
+        localStorage.setItem(
+          "bucketListInLocalStorage",
+          JSON.stringify(bucketListInLocalStorage)
+        );
+      });
+
+      // Lägg till aktiviteten/ nytt listItem i UL
+      ulElem.appendChild(newListItemElem);
+      // --------------------------------------------------------
     });
-
-    // En knapp för att klarmarkera aktiviteten
-    const newBtnElemDone = document.createElement("button");
-    newBtnElemDone.textContent = "Klar"; // Ska kopplas till boolean isDone - default värde = false men denna knapp ska trigga true
-    newListItemElem.appendChild(newBtnElemDone);
-
-    // Eventlyssnare på Klarmarkera-knappen
-    newBtnElemDone.addEventListener("click", () => {
-      // Ändra isDone till true
-      activity.isDone = true;
-
-      // Ändra style till att stryka över texten samt göra knappen till en checkmark
-      newActivityNameElem.style.textDecoration = "line-through";
-      newCategoryElem.style.textDecoration = "line-through";
-      newBtnElemDone.innerHTML = "<i class='fa fa-check'></i>";
-    });
-
-    ulElem.appendChild(newListItemElem);
-
-    // --------------------------------------------------------
-  });
+  }
 }
 
 // Lägg till en eventlyssnare på formuläret för att lägga till nya aktiviteter
@@ -120,8 +153,24 @@ function addNewActivityToBucketList() {
     isDone: false,
   };
 
-  // Lägg till det nya objektet i listan
-  bucketList.push(activity);
+  // Checka av om listan finns sparad i localStorage
+  if (!localStorage.getItem("bucketListInLocalStorage")) {
+    // Om ingen lista finns sparad i LS - spara listan innehållandes aktiviteten
+    localStorage.setItem(
+      "bucketListInLocalStorage",
+      JSON.stringify([activity])
+    );
+  } else {
+    // Om det redan finns en lista - pusha den nya aktiviteten till befintlig lista
+    const bucketListInLocalStorage = JSON.parse(
+      localStorage.getItem("bucketListInLocalStorage")
+    );
+    bucketListInLocalStorage.push(activity);
+    localStorage.setItem(
+      "bucketListInLocalStorage",
+      JSON.stringify(bucketListInLocalStorage)
+    );
+  }
 
   // Återställ formulären
   activityInput.value = "";
