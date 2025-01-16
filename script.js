@@ -70,8 +70,15 @@ function renderBucketList() {
     newListItemElem.appendChild(newBtnElemDel);
 
     // Eventlyssnare på Ta bort-knappen
-    newBtnElemDel.addEventListener("click", (event) => {
-      console.log("Ta bort: ", activity);
+    newBtnElemDel.addEventListener("click", () => {
+      // Vilket index har aktiviteten jag vill ta bort?
+      const index = bucketList.indexOf(activity);
+
+      // Ta bort aktiviteten
+      bucketList.splice(index, 1);
+
+      // Rendera om bucket list för att få en uppdaterad version
+      renderBucketList();
     });
 
     // En knapp för att klarmarkera aktiviteten
