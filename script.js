@@ -28,11 +28,18 @@ function printActivityCategories(bucketListInLocalStorage) {
   categories.forEach((category) => {
     // Skapa och lägg till h2 som rubrik för varje kategori
     const newCategoryHeading = document.createElement("h2");
+
+    // Tilldela ett className
+    newCategoryHeading.className = "categoryHeading";
+
+    // Tilldela innehåll
     newCategoryHeading.textContent = category;
+
+    // Lägg till elementet
     bucketListsElem.appendChild(newCategoryHeading);
 
     // Skapa och lägg till en ul för varje kategori. Dessa ska sedan lista alla aktiviteter inom varje kategori
-    const newUl = document.createElement("ul");
+    const newUlElem = document.createElement("ul");
 
     // Översätter de svenska kategorierna till engelska då jag vill ha min className på engelska
     const categoryTranslations = {
@@ -47,10 +54,10 @@ function printActivityCategories(bucketListInLocalStorage) {
       categoryTranslations[category.toLowerCase()] || "unknown";
 
     // Tilldelar det engelska className till de nya listorna som skapas
-    newUl.className = englishClassName;
+    newUlElem.className = englishClassName;
 
     // Lägger till listan i DOM:en
-    bucketListsElem.appendChild(newUl);
+    bucketListsElem.appendChild(newUlElem);
   });
 }
 
@@ -81,7 +88,9 @@ function renderBucketList() {
         categoryTranslations[activity.category.toLowerCase()];
 
       // Hitta UL-elementet baserat på den översatta kategorin
-      const newUlElem = document.querySelector(`ul.${translatedCategory}`);
+      const ulMatchingTheCatgeory = document.querySelector(
+        `ul.${translatedCategory}`
+      );
 
       // Ny li för varje aktivitet
       const newListItemElem = document.createElement("li");
@@ -150,7 +159,7 @@ function renderBucketList() {
       });
 
       // Lägg till aktiviteten/ nytt listItem i den listan med rätt kategori för aktiviteten
-      newUlElem.appendChild(newListItemElem);
+      ulMatchingTheCatgeory.appendChild(newListItemElem);
       // --------------------------------------------------------
     });
   }
@@ -198,3 +207,23 @@ function addNewActivityToBucketList() {
 
   renderBucketList();
 }
+
+// Sortera aktiviteterna i varje lista i bokstavsordning
+function sortActivitiesAlphabetically() {
+  // Hämta alla ul-element
+  const lists = document.querySelectorAll("ul"); // NodeList med ul.className
+
+  // Iterera över varje ul och sortera dess innehåll
+  lists.forEach((ul) => {
+    // Konverterar resultatet från en NodeList till en array. På den kan sedan sort användas
+    const listItems = Array.from(ul.querySelectorAll("li"));
+
+    // Sortera li-elementen i bokstavsordning
+    listItems.sort((a, b) => a.textContent.localeCompare(b.textContent));
+
+    // Omorganisera li-elementen i ul
+    listItems.forEach((li) => ul.appendChild(li));
+  });
+}
+
+sortActivitiesAlphabetically();
