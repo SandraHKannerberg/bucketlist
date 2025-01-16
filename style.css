@@ -42,6 +42,7 @@ li {
   padding: 5px 0;
   display: grid;
   grid-template-columns: 2fr 2fr 1fr 1fr;
+  align-items: center;
 }
 
 button {

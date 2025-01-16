@@ -1,11 +1,5 @@
 // Starta med en tom array som håller alla aktiviteter
-
 const bucketList = [];
-
-// Jag vill att varje aktivitet blir ett objekt med följande egenskaper
-// category
-// description
-// isDone
 
 // Variabler jag behöver fånga upp från HTML
 const bucketListsElem = document.getElementById("bucketLists");
@@ -13,12 +7,6 @@ const activityInput = document.getElementById("activityName");
 const activityCategorySelect = document.getElementById("activityCategory");
 const registerForm = document.querySelector("#bucketForm");
 const ulElem = document.querySelector("#bucketList");
-
-// Eventlyssnare
-registerForm.addEventListener("submit", (event) => {
-  event.preventDefault(); // Förhindra att sidan laddas om
-  addNewActivityToBucketList(); // Kör funktionen för att lägga till aktiviteten i bucketList
-});
 
 renderBucketList();
 
@@ -81,10 +69,26 @@ function renderBucketList() {
     newBtnElemDel.textContent = "Ta bort";
     newListItemElem.appendChild(newBtnElemDel);
 
+    // Eventlyssnare på Ta bort-knappen
+    newBtnElemDel.addEventListener("click", (event) => {
+      console.log("Ta bort: ", activity);
+    });
+
     // En knapp för att klarmarkera aktiviteten
     const newBtnElemDone = document.createElement("button");
     newBtnElemDone.textContent = "Klar"; // Ska kopplas till boolean isDone - default värde = false men denna knapp ska trigga true
     newListItemElem.appendChild(newBtnElemDone);
+
+    // Eventlyssnare på Klarmarkera-knappen
+    newBtnElemDone.addEventListener("click", () => {
+      // Ändra isDone till true
+      activity.isDone = true;
+
+      // Ändra style till att stryka över texten samt göra knappen till en checkmark
+      newActivityNameElem.style.textDecoration = "line-through";
+      newCategoryElem.style.textDecoration = "line-through";
+      newBtnElemDone.innerHTML = "<i class='fa fa-check'></i>";
+    });
 
     ulElem.appendChild(newListItemElem);
 
@@ -94,14 +98,13 @@ function renderBucketList() {
 
 // Lägg till en eventlyssnare på formuläret för att lägga till nya aktiviteter
 
-// PSEUDOKOD --------------------------------------------------
-// - funktionen ska fånga upp värdet av användarens input
-// - detta värde ska sparas i en variabel
-// - kolla om det finns en ul med aktuell category / finns HTML-elementet
-// - JA? push ny aktivitet till arrayen bucketList
-// - NEJ? skapa det ul elementet först med className som sin category SEN push aktivitet till array bucketList
-// ------------------------------------------------------------
+// Eventlyssnare
+registerForm.addEventListener("submit", (event) => {
+  event.preventDefault(); // Förhindra att sidan laddas om
+  addNewActivityToBucketList(); // Kör funktionen för att lägga till aktiviteten i bucketList
+});
 
+// Funktionen som ska triggas av eventlyssnaren submit
 function addNewActivityToBucketList() {
   // Skapa objektet
   const activity = {
