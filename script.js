@@ -1,5 +1,6 @@
 // Starta med en tom array som håller alla aktiviteter
 // Behöver inte denna då jag gått vidare till uppgiften på Level ups nivå med localStorage, så min lista sparas där och det är den jag utgår ifrån
+
 // const bucketList = [];
 
 // Variabler jag behöver fånga upp från HTML
@@ -7,15 +8,10 @@ const bucketListsElem = document.getElementById("bucketLists");
 const activityInput = document.getElementById("activityName");
 const activityCategorySelect = document.getElementById("activityCategory");
 const registerForm = document.querySelector("#bucketForm");
-const ulElem = document.querySelector("#bucketList");
 
 renderBucketList();
 
-// Deklarera en funktion som får fram vilka kategorier som finns med i listan
-// Funktionen tar in arrayen bucketList som ett argument
-// Skapa ett nytt ul-element för varje kategori som finns med
-// Ge varje ul en h2 med kategorin som rubrik
-
+// Funktion som får fram vilka kategorier som finns med i listan
 function printActivityCategories(bucketListInLocalStorage) {
   bucketListsElem.innerHTML = "";
   // Skapa en uppsättning för att lagra unika kategorier
@@ -60,14 +56,15 @@ function printActivityCategories(bucketListInLocalStorage) {
 
 // Skapa en funktion som ritar upp listan dynamiskt i DOM ----------------------------------------------------
 function renderBucketList() {
-  ulElem.innerHTML = "";
-
+  // Hämta listan från locla storage
   const bucketListInLocalStorage = JSON.parse(
     localStorage.getItem("bucketListInLocalStorage")
   );
 
+  // Kör funktionen för att kolla kategorier
   printActivityCategories(bucketListInLocalStorage);
 
+  // Översätt kategorierna
   const categoryTranslations = {
     resor: "trips",
     äventyr: "adventures",
@@ -76,15 +73,15 @@ function renderBucketList() {
     hemmafix: "renovation",
   };
 
+  // Om listan finns i local storage kör:
   if (bucketListInLocalStorage) {
     bucketListInLocalStorage.forEach((activity) => {
-      //Översätt kategorierna
+      // Matchar översättningen den aktuella aktivitetens kategori?
       const translatedCategory =
         categoryTranslations[activity.category.toLowerCase()];
 
       // Hitta UL-elementet baserat på den översatta kategorin
       const newUlElem = document.querySelector(`ul.${translatedCategory}`);
-      console.log(newUlElem);
 
       // Ny li för varje aktivitet
       const newListItemElem = document.createElement("li");
@@ -93,11 +90,6 @@ function renderBucketList() {
       const newActivityNameElem = document.createElement("p");
       newActivityNameElem.textContent = activity.description;
       newListItemElem.appendChild(newActivityNameElem);
-
-      // Ett p-element för att skriva ut kategorin
-      const newCategoryElem = document.createElement("p");
-      newCategoryElem.textContent = activity.category;
-      newListItemElem.appendChild(newCategoryElem);
 
       // En knapp för att ta bort aktiviteten från listan
       const newBtnElemDel = document.createElement("button");
@@ -108,7 +100,6 @@ function renderBucketList() {
       newBtnElemDel.addEventListener("click", () => {
         // Vilket index har aktiviteten jag vill ta bort?
         const index = bucketListInLocalStorage.indexOf(activity);
-        console.log(index);
 
         // Ta bort aktiviteten och uppdatera listan i LS
         bucketListInLocalStorage.splice(index, 1);
@@ -118,7 +109,7 @@ function renderBucketList() {
           JSON.stringify(bucketListInLocalStorage)
         );
 
-        // Rendera om bucket list för att få en uppdaterad version
+        // Rendera ut bucket list igen för att få en uppdaterad version
         renderBucketList();
       });
 
@@ -138,7 +129,7 @@ function renderBucketList() {
       // Eventlyssnare på Klarmarkera-knappen
       newBtnElemDone.addEventListener("click", () => {
         // Kolla värdet på isDone
-        // Ska gå att klicka igenom man klarmarkerat av misstag, och så knappen och texten återgå till ursprunglig text och style
+        // Ska gå att klicka igen om man klarmarkerat av misstag, och så knappen och texten återgå till ursprunglig text och style
         if (activity.isDone) {
           activity.isDone = false;
           newBtnElemDone.textContent = "Klar";
