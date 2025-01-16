@@ -2,46 +2,24 @@
 
 const bucketList = [];
 
-// Varje aktivitet blir ett objekt med följande egenskaper
+// Jag vill att varje aktivitet blir ett objekt med följande egenskaper
 // category
 // description
 // isDone
 
-const activity = {
-  category: "Hemmafix",
-  description: "Decluttering",
-  isDone: false,
-};
+// Variabler jag behöver fånga upp från HTML
+const bucketListsElem = document.getElementById("bucketLists");
+const activityInput = document.getElementById("activityName");
+const activityCategorySelect = document.getElementById("activityCategory");
+// const registerForm = document.querySelector("#bucketForm");
+const ulElem = document.querySelector("#bucketList");
+const submitBtnElem = document.querySelector(".submitBtn");
 
-bucketList.push(
-  {
-    category: "Hemmafix",
-    description: "Decluttering",
-    isDone: false,
-  },
-  {
-    category: "Hemmafix",
-    description: "Hallen",
-    isDone: false,
-  },
-  {
-    category: "Hemmafix",
-    description: "Garderober",
-    isDone: false,
-  },
-  {
-    category: "Äventyr",
-    description: "Tatuering",
-    isDone: false,
-  },
-  {
-    category: "Resor",
-    description: "Varmt",
-    isDone: false,
-  }
-);
+// Eventlyssnare
+submitBtnElem.addEventListener("click", addNewActivityToBucketList);
+// registerForm.addEventListener("submit", addNewActivityToBucketList);
 
-const bucketListsEl = document.querySelector("#bucketLists");
+renderBucketList();
 
 // Deklarera en funktion som får fram vilka kategorier som finns med i listan
 // Funktionen tar in arrayen bucketList som ett argument
@@ -64,50 +42,55 @@ function printActivityCategories(bucketList) {
     // Skapa och lägg till h2 som rubrik för varje kategori
     const newCategoryHeading = document.createElement("h2");
     newCategoryHeading.textContent = category;
-    bucketListsEl.appendChild(newCategoryHeading);
+    bucketListsElem.appendChild(newCategoryHeading);
 
     // Skapa och lägg till en ul för varje kategori. Dessa ska sedan lista alla aktiviteter inom varje kategori
     const newUl = document.createElement("ul");
     newUl.className = category;
-    bucketListsEl.appendChild(newUl);
+    bucketListsElem.appendChild(newUl);
   });
 }
 
-// Kalla på funktionen inom skapa ny aktivitet funktion ???????????????
-printActivityCategories(bucketList);
+// printActivityCategories(bucketList);
 
 // Skapa en funktion som ritar upp listan dynamiskt i DOM ----------------------------------------------------
 function renderBucketList() {
-  bucketList.forEach((activity) => {
-    // Här skapas ett nytt ul-element utifrån className = aktuell kategori
-    const newUlElemByActivityCategory = document.querySelector(
-      `.${activity.category}`
-    );
+  // Steg 2 få in dessa istället när bucketList finns i localStorage
+  // const bucketList = JSON.parse(localStorage.getItem("bucketList"));
+  // if (bucketList) {FLYTTA UPP KODBLOCKET FÖR RENDERING HIT}
 
+  ulElem.innerHTML = "";
+
+  bucketList.forEach((activity) => {
     // Ny li för varje aktivitet
     const newListItemElem = document.createElement("li");
-    newUlElemByActivityCategory.appendChild(newListItemElem);
+    console.log("Från funktion renderBucketList: ", activity);
 
-    // Varje li får: -----------------------------------------
     // Ett p-element för att skriva ut beskrivningen
-    const newParagraphElem = document.createElement("p");
-    newParagraphElem.textContent = activity.description;
-    newListItemElem.appendChild(newParagraphElem);
+    const newActivityNameElem = document.createElement("p");
+    newActivityNameElem.textContent = activity.description;
+    newListItemElem.appendChild(newActivityNameElem);
+
+    // Ett p-element för att skriva ut kategorin
+    const newCategoryElem = document.createElement("p");
+    newCategoryElem.textContent = activity.category;
+    newListItemElem.appendChild(newCategoryElem);
+
+    // En knapp för att ta bort aktiviteten från listan
+    const newBtnElemDel = document.createElement("button");
+    newBtnElemDel.textContent = "Ta bort";
+    newListItemElem.appendChild(newBtnElemDel);
 
     // En knapp för att klarmarkera aktiviteten
     const newBtnElemDone = document.createElement("button");
     newBtnElemDone.textContent = "Klar"; // Ska kopplas till boolean isDone - default värde = false men denna knapp ska trigga true
     newListItemElem.appendChild(newBtnElemDone);
 
-    // En knapp för att ta bort aktiviteten från listan
-    const newBtnElemDel = document.createElement("button");
-    newBtnElemDel.textContent = "Ta bort";
-    newListItemElem.appendChild(newBtnElemDel);
+    ulElem.appendChild(newListItemElem);
+
     // --------------------------------------------------------
   });
 }
-
-renderBucketList();
 
 // Lägg till en eventlyssnare på formuläret för att lägga till nya aktiviteter
 
@@ -119,4 +102,22 @@ renderBucketList();
 // - NEJ? skapa det ul elementet först med className som sin category SEN push aktivitet till array bucketList
 // ------------------------------------------------------------
 
-// Skapa en funktion som rensar din lista när sidan laddas om
+function addNewActivityToBucketList() {
+  // event.preventDefault();
+
+  const activity = {
+    description: activityInput.value,
+    category: activityCategorySelect.value,
+    isDone: false,
+  };
+
+  bucketList.push(activity);
+
+  console.log(bucketList);
+
+  // Återställ formulären
+  activityInput.value = "";
+  activityCategorySelect.value = "Resor";
+
+  renderBucketList();
+}
