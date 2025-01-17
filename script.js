@@ -60,6 +60,7 @@ function updateGroupedCategories() {
 
 // Render the bucket list dynamically in the DOM
 function renderBucketList() {
+  bucketListsElem.innerHTML = "";
   updateGroupedCategories();
   // Is there a list? Go to:
   if (groupedCategories) {
@@ -273,17 +274,11 @@ function addNewActivityToBucketList() {
   activityInput.value = "";
   activityCategorySelect.value = "--Välj kategori--";
 
-  // updateGroupedCategories();
-
   renderBucketList();
 }
 
 // DELETE AN ACTIVITY --------------------------------------------------------------------------
 function deleteActivity(id) {
-  // Remove from grouped list
-  // const indexGroupedCategories = groupedCategories.indexOf(id);
-  // groupedCategories.splice(indexGroupedCategories, 1);
-
   //Remove from local storage
   // Find the activity in bucketListInLocalStorage by id
   const activityToDelete = bucketListInLocalStorage.find(
@@ -299,8 +294,6 @@ function deleteActivity(id) {
 
   // Save new list in local storage
   saveBucketListToLocalStorage();
-
-  updateGroupedCategories();
 
   renderBucketList();
 }
