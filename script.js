@@ -118,6 +118,7 @@ function renderBucketList() {
       const newBtnElemDel = document.createElement("button");
       newBtnElemDel.textContent = "Ta bort";
       newListItemElem.appendChild(newBtnElemDel);
+      newBtnElemDel.className = "delBtn";
 
       // Eventlyssnare på Ta bort-knappen
       newBtnElemDel.addEventListener("click", () => {
@@ -140,6 +141,7 @@ function renderBucketList() {
       const newBtnElemEdit = document.createElement("button");
       newBtnElemEdit.textContent = "Redigera";
       newListItemElem.appendChild(newBtnElemEdit);
+      newBtnElemEdit.className = "editBtn";
 
       // Eventlyssnare på Redigera-knappen denna ska egentligen bara öppna modalen för att ändra. Ändringarna sparas först när Spara-knappen triggas
       newBtnElemEdit.addEventListener("click", () => {
@@ -231,6 +233,7 @@ function renderBucketList() {
       // En knapp för att klarmarkera aktiviteten
       const newBtnElemDone = document.createElement("button");
       newListItemElem.appendChild(newBtnElemDone);
+      newBtnElemDone.className = "doneBtn";
 
       // Dynamiskt innehåll på knappen beroende på om aktiviteten är markerad som isDone eller inte. Klar visas när isDone = false, isDone = true visar checkmark istället.
       if (!activity.isDone) {
@@ -238,7 +241,6 @@ function renderBucketList() {
       } else {
         newBtnElemDone.innerHTML = "<i class='fa fa-check'></i>";
         newActivityNameElem.style.textDecoration = "line-through";
-        newCategoryElem.style.textDecoration = "line-through";
       }
 
       // Eventlyssnare på Klarmarkera-knappen
@@ -249,11 +251,9 @@ function renderBucketList() {
           activity.isDone = false;
           newBtnElemDone.textContent = "Klar";
           newActivityNameElem.style.textDecoration = "none";
-          newCategoryElem.style.textDecoration = "none";
         } else {
           activity.isDone = true;
           newActivityNameElem.style.textDecoration = "line-through";
-          newCategoryElem.style.textDecoration = "line-through";
           newBtnElemDone.innerHTML = "<i class='fa fa-check'></i>";
         }
 
