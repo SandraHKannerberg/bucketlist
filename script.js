@@ -31,6 +31,13 @@ function saveBucketListToLocalStorage() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(bucketListInLocalStorage));
 }
 
+// Check if any data are stored in local storage
+function dataInLocalStorageCheck() {
+  bucketListInLocalStorage
+    ? printActivityCategories(bucketListInLocalStorage)
+    : [];
+}
+
 // HANDLE CATEGORIES ----------------------------------------------------------------------------
 
 // Funktion som får fram vilka kategorier som finns med i listan
@@ -85,14 +92,10 @@ function printActivityCategories(bucketListInLocalStorage) {
 
 // HANDLE BUCKET LIST AND ACTIVITIES -----------------------------------------------------------------------------
 
-// Skapa en funktion som ritar upp listan dynamiskt i DOM
+// Render the bucket list dynamically in the DOM
 function renderBucketList() {
-  if (!bucketListInLocalStorage) {
-    console.log("Inget att visa");
-  } else {
-    // Kör funktionen för att kolla kategorier
-    printActivityCategories(bucketListInLocalStorage);
-  }
+  // Call the function that checks if any data are stored in local storage
+  dataInLocalStorageCheck();
 
   // Översätt kategorierna
   const categoryTranslations = {
@@ -273,36 +276,34 @@ function renderBucketList() {
 
 // --------------------------------------------------------------------------------
 
-// Lägg till en eventlyssnare på formuläret för att lägga till nya aktiviteter
+// EVENTLISTENER --- ADD NEW ACTIVITY
 
-// Eventlyssnare
 registerForm.addEventListener("submit", (event) => {
   event.preventDefault(); // Förhindra att sidan laddas om
   addNewActivityToBucketList(); // Kör funktionen för att lägga till aktiviteten i bucketList
 });
 
-// Funktionen som ska triggas av eventlyssnaren submit
 function addNewActivityToBucketList() {
-  // Skapa objektet
+  // Save the object
   const activity = {
     description: activityInput.value,
     category: activityCategorySelect.value,
     isDone: false,
   };
 
-  // Checka av om listan finns sparad i localStorage
+  // Check if a list excist in local storage
   if (!bucketListInLocalStorage) {
-    // Ingen lista = skapa en ny
+    // No list = create a new one
     createNewBucketListToLocalStorage();
   } else {
-    // Det finns en lista redan = pusha den nya aktiviteten till befintlig lista
+    // List already excist = push the new activity to that list
     bucketListInLocalStorage.push(activity);
     saveBucketListToLocalStorage();
   }
 
-  // Återställ formulären
+  // Reset the form
   activityInput.value = "";
-  activityCategorySelect.value = "Resor";
+  activityCategorySelect.value = "--Välj kategori--";
 
   renderBucketList();
 }
