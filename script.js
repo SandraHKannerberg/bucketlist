@@ -5,6 +5,15 @@ const activityCategorySelect = document.getElementById("activityCategory");
 const registerForm = document.querySelector("#bucketForm");
 const bodyElem = document.querySelector("body");
 
+// Översätter de svenska kategorierna till engelska då jag vill ha min className på engelska
+const categoryTranslations = {
+  resor: "trips",
+  äventyr: "adventures",
+  lärande: "learning",
+  hobby: "hobby",
+  hemmafix: "renovation",
+};
+
 // INIT --------------------------------------------------------------------------------------------
 
 function init() {
@@ -59,21 +68,53 @@ const groupedCategories = bucketListInLocalStorage.reduce((acc, activity) => {
 
 console.log(groupedCategories);
 
+// Funktion som får fram vilka kategorier som finns med i listan
+function printActivityCategories(bucketListInLocalStorage) {
+  bucketListsElem.innerHTML = "";
+  // Skapa en uppsättning för att lagra unika kategorier
+  const categories = new Set();
+
+  // Loopar igenom aktiviteterna
+  bucketListInLocalStorage.forEach((activity) => {
+    if (activity.category) {
+      categories.add(activity.category); // Lägg till kategorin i setet
+    }
+  });
+
+  // Skriv ut kategorierna
+  categories.forEach((category) => {
+    // Skapa och lägg till h2 som rubrik för varje kategori
+    const newCategoryHeading = document.createElement("h2");
+
+    // Tilldela ett className
+    newCategoryHeading.className = "categoryHeading";
+
+    // Tilldela innehåll
+    newCategoryHeading.textContent = category;
+
+    // Lägg till elementet
+    bucketListsElem.appendChild(newCategoryHeading);
+
+    // Skapa och lägg till en ul för varje kategori. Dessa ska sedan lista alla aktiviteter inom varje kategori
+    const newUlElem = document.createElement("ul");
+
+    const englishClassName =
+      categoryTranslations[category.toLowerCase()] || "unknown";
+
+    // Tilldelar det engelska className till de nya listorna som skapas
+    newUlElem.className = englishClassName;
+
+    // Lägger till listan i DOM:en
+    bucketListsElem.appendChild(newUlElem);
+  });
+}
+
 // HANDLE BUCKET LIST AND ACTIVITIES -----------------------------------------------------------------------------
 
 // Render the bucket list dynamically in the DOM
 function renderBucketList() {
   // Call the function that checks if any data are stored in local storage
   dataInLocalStorageCheck();
-
-  // Översätt kategorierna
-  const categoryTranslations = {
-    resor: "trips",
-    äventyr: "adventures",
-    lärande: "learning",
-    hobby: "hobby",
-    hemmafix: "renovation",
-  };
 
   // Om listan finns i local storage kör:
   if (bucketListInLocalStorage) {
@@ -248,13 +289,17 @@ function renderBucketList() {
 // EVENTLISTENER --- ADD NEW ACTIVITY
 
 registerForm.addEventListener("submit", (event) => {
-  event.preventDefault(); // Förhindra att sidan laddas om
-  addNewActivityToBucketList(); // Kör funktionen för att lägga till aktiviteten i bucketList
+  event.preventDefault(); // Prevent page reload
+  addNewActivityToBucketList();
 });
 
 function addNewActivityToBucketList() {
+  // Calculate id of new activity
+  const id = "id" + Math.random().toString(16).slice(2);
+
   // Save the object
   const activity = {
+    id: id,
     description: activityInput.value,
     category: activityCategorySelect.value,
     isDone: false,
