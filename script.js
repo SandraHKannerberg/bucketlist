@@ -1,23 +1,37 @@
-// Starta med en tom array som håller alla aktiviteter
-// Behöver inte denna då jag gått vidare till uppgiften på Level ups nivå med localStorage, så min lista sparas där och det är den jag utgår ifrån
-
-// const bucketList = [];
-
-// ---------------------------------------------------------------------------------
-
-// Variabler jag behöver fånga upp från HTML
+// VARIABLES FROM THE HTML-FILE ---------------------------------------------------------------------------------
 const bucketListsElem = document.getElementById("bucketLists");
 const activityInput = document.getElementById("activityName");
 const activityCategorySelect = document.getElementById("activityCategory");
 const registerForm = document.querySelector("#bucketForm");
 const bodyElem = document.querySelector("body");
 
-// ------------------------------------------------------------------------------
+// INIT --------------------------------------------------------------------------------------------
 
-// Kör funktion för att rendera ut bucket list direkt när sidan öppnas / laddas om
-renderBucketList();
+function init() {
+  renderBucketList();
+}
 
-// ----------------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", init);
+
+// HANDLE LOCAL STORAGE ----------------------------------------------------------------------------
+
+// Save the name of my list in local storage as a key
+const STORAGE_KEY = "bucketListInLocalStorage";
+
+// Get the list from från local storage
+const bucketListInLocalStorage = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+// No list i LS? Save a new and add the activity as an object
+function createNewBucketListToLocalStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([activity]));
+}
+
+// Save list to local storage - usefull for updates
+function saveBucketListToLocalStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(bucketListInLocalStorage));
+}
+
+// HANDLE CATEGORIES ----------------------------------------------------------------------------
 
 // Funktion som får fram vilka kategorier som finns med i listan
 function printActivityCategories(bucketListInLocalStorage) {
@@ -69,15 +83,10 @@ function printActivityCategories(bucketListInLocalStorage) {
   });
 }
 
-// -----------------------------------------------------------------------------
+// HANDLE BUCKET LIST AND ACTIVITIES -----------------------------------------------------------------------------
 
 // Skapa en funktion som ritar upp listan dynamiskt i DOM
 function renderBucketList() {
-  // Hämta listan från local storage och spara i en variabel
-  const bucketListInLocalStorage = JSON.parse(
-    localStorage.getItem("bucketListInLocalStorage")
-  );
-
   if (!bucketListInLocalStorage) {
     console.log("Inget att visa");
   } else {
@@ -128,10 +137,7 @@ function renderBucketList() {
         // Ta bort aktiviteten och uppdatera listan i LS
         bucketListInLocalStorage.splice(index, 1);
 
-        localStorage.setItem(
-          "bucketListInLocalStorage",
-          JSON.stringify(bucketListInLocalStorage)
-        );
+        saveBucketListToLocalStorage();
 
         // Rendera ut bucket list igen för att få en uppdaterad version
         renderBucketList();
@@ -173,7 +179,7 @@ function renderBucketList() {
         const editActivityInput = document.createElement("input");
         editActivityInput.id = "activityName";
         editActivityInput.type = "text";
-        editActivityInput.placeholder = activity.description; // Default nuvarande värde
+        editActivityInput.defaultValue = activity.description; // Default nuvarande värde
         editModal.appendChild(editActivityInput);
 
         // Skapa en dropdown för kategori
@@ -217,10 +223,7 @@ function renderBucketList() {
           const editSelectValue = categorySelect.value;
           activity.category = editSelectValue;
 
-          localStorage.setItem(
-            "bucketListInLocalStorage",
-            JSON.stringify(bucketListInLocalStorage)
-          );
+          saveBucketListToLocalStorage();
 
           // Stäng modalen när ändringar är sparade
           modalOverlay.remove();
@@ -258,10 +261,7 @@ function renderBucketList() {
         }
 
         // Uppdatera listan i LS
-        localStorage.setItem(
-          "bucketListInLocalStorage",
-          JSON.stringify(bucketListInLocalStorage)
-        );
+        saveBucketListToLocalStorage();
       });
 
       // Lägg till aktiviteten/ nytt listItem i den listan med rätt kategori för aktiviteten
@@ -291,22 +291,13 @@ function addNewActivityToBucketList() {
   };
 
   // Checka av om listan finns sparad i localStorage
-  if (!localStorage.getItem("bucketListInLocalStorage")) {
-    // Om ingen lista finns sparad i LS - spara listan innehållandes aktiviteten
-    localStorage.setItem(
-      "bucketListInLocalStorage",
-      JSON.stringify([activity])
-    );
+  if (!bucketListInLocalStorage) {
+    // Ingen lista = skapa en ny
+    createNewBucketListToLocalStorage();
   } else {
-    // Om det redan finns en lista - pusha den nya aktiviteten till befintlig lista
-    const bucketListInLocalStorage = JSON.parse(
-      localStorage.getItem("bucketListInLocalStorage")
-    );
+    // Det finns en lista redan = pusha den nya aktiviteten till befintlig lista
     bucketListInLocalStorage.push(activity);
-    localStorage.setItem(
-      "bucketListInLocalStorage",
-      JSON.stringify(bucketListInLocalStorage)
-    );
+    saveBucketListToLocalStorage();
   }
 
   // Återställ formulären
