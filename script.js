@@ -40,55 +40,24 @@ function dataInLocalStorageCheck() {
 
 // HANDLE CATEGORIES ----------------------------------------------------------------------------
 
-// Funktion som får fram vilka kategorier som finns med i listan
-function printActivityCategories(bucketListInLocalStorage) {
-  bucketListsElem.innerHTML = "";
-  // Skapa en uppsättning för att lagra unika kategorier
-  const categories = new Set();
+// Group categories
+const groupedCategories = bucketListInLocalStorage.reduce((acc, activity) => {
+  // Find the category object in the accumulator
+  let categoryObj = acc.find((group) => group.category === activity.category);
 
-  // Loopar igenom aktiviteterna
-  bucketListInLocalStorage.forEach((activity) => {
-    if (activity.category) {
-      categories.add(activity.category); // Lägg till kategorin i setet
-    }
-  });
+  if (!categoryObj) {
+    // If the category doesn't exist, create a new one
+    categoryObj = { category: activity.category, activities: [] };
+    acc.push(categoryObj);
+  }
 
-  // Skriv ut kategorierna
-  categories.forEach((category) => {
-    // Skapa och lägg till h2 som rubrik för varje kategori
-    const newCategoryHeading = document.createElement("h2");
+  // Add the activity to the right category object
+  categoryObj.activities.push(activity);
 
-    // Tilldela ett className
-    newCategoryHeading.className = "categoryHeading";
+  return acc;
+}, []);
 
-    // Tilldela innehåll
-    newCategoryHeading.textContent = category;
-
-    // Lägg till elementet
-    bucketListsElem.appendChild(newCategoryHeading);
-
-    // Skapa och lägg till en ul för varje kategori. Dessa ska sedan lista alla aktiviteter inom varje kategori
-    const newUlElem = document.createElement("ul");
-
-    // Översätter de svenska kategorierna till engelska då jag vill ha min className på engelska
-    const categoryTranslations = {
-      resor: "trips",
-      äventyr: "adventures",
-      lärande: "learning",
-      hobby: "hobby",
-      hemmafix: "renovation",
-    };
-
-    const englishClassName =
-      categoryTranslations[category.toLowerCase()] || "unknown";
-
-    // Tilldelar det engelska className till de nya listorna som skapas
-    newUlElem.className = englishClassName;
-
-    // Lägger till listan i DOM:en
-    bucketListsElem.appendChild(newUlElem);
-  });
-}
+console.log(groupedCategories);
 
 // HANDLE BUCKET LIST AND ACTIVITIES -----------------------------------------------------------------------------
 
