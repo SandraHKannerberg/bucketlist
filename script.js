@@ -60,6 +60,7 @@ function updateGroupedCategories() {
 function renderBucketList() {
   bucketListsElem.innerHTML = "";
   updateGroupedCategories();
+  sortActivitiesAlphabetically();
   // Is there a list? Go to:
   if (groupedCategories) {
     groupedCategories.forEach((category) => {
@@ -300,20 +301,9 @@ function saveEdit(id, inputText, inputSelect) {
 
 // SORT ACTIVITES ------------------------------------------------------------------------
 function sortActivitiesAlphabetically() {
-  // Hämta alla ul-element
-  const lists = document.querySelectorAll("ul"); // NodeList med ul.className
-
-  // Iterera över varje ul och sortera dess innehåll
-  lists.forEach((ul) => {
-    // Konverterar resultatet från en NodeList till en array. På den kan sedan sort användas
-    const listItems = Array.from(ul.querySelectorAll("li"));
-
-    // Sortera aktiviteterna i bokstavsordning
-    listItems.sort((a, b) => a.textContent.localeCompare(b.textContent));
-
-    // Omorganisera li-elementen/aktiviteterna i ul
-    listItems.forEach((li) => ul.appendChild(li));
+  groupedCategories.forEach((activity) => {
+    activity.activities.sort((a, b) =>
+      a.description.localeCompare(b.description)
+    );
   });
 }
-
-sortActivitiesAlphabetically();
