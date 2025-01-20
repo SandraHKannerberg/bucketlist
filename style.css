@@ -77,6 +77,12 @@ button {
   color: #fefaf6;
 }
 
+.doneBtn:has(.fa-solid.fa-arrow-rotate-left) {
+  color: #75a47f;
+  border: 2px solid #75a47f;
+  background-color: #fefaf6;
+}
+
 h1 {
   font-family: "Alice", serif;
   font-weight: 400;

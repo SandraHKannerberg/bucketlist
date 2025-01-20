@@ -52,8 +52,6 @@ function updateGroupedCategories() {
 
     return acc;
   }, []);
-
-  console.log(groupedCategories);
 }
 
 // HANDLE BUCKET LIST AND ACTIVITIES -----------------------------------------------------------------------------
@@ -103,144 +101,33 @@ function renderBucketList() {
         newListItemElem.appendChild(newBtnElemEdit);
         newBtnElemEdit.className = "editBtn";
 
+        // Eventlistener for mark as done
+        newBtnElemEdit.addEventListener("click", () => {
+          openEditModal(activity.id);
+        });
+
         // "Mark as done" button
         const newBtnElemDone = document.createElement("button");
         newListItemElem.appendChild(newBtnElemDone);
         newBtnElemDone.className = "doneBtn";
 
-        if (!activity.isDone) {
-          newBtnElemDone.textContent = "Klar";
-        } else {
-          newBtnElemDone.innerHTML = "<i class='fa fa-check'></i>";
-          newActivityNameElem.style.textDecoration = "line-through";
-        }
+        // Add icon element to button
+        const newIconElem = document.createElement("i");
+        newBtnElemDone.appendChild(newIconElem);
+
+        // Eventlistener for mark as done
+        newBtnElemDone.addEventListener("click", () => {
+          markActivityAsDone(activity.id);
+        });
+
+        // Display different icons on the button based on the value of isDone
+        newIconElem.className = activity.isDone
+          ? "fa-solid fa-arrow-rotate-left"
+          : "fa fa-check";
       });
     });
   }
 }
-
-// Eventlyssnare på Redigera-knappen denna ska egentligen bara öppna modalen för att ändra. Ändringarna sparas först när Spara-knappen triggas
-// newBtnElemEdit.addEventListener("click", () => {
-//   // Vilket index har aktiviteten jag vill redigera?
-//   const index = bucketListInLocalStorage.indexOf(activity);
-
-//   // Redigera modalen ---------------------------------
-//   // Skapa modalens bakgrund (overlay)
-//   const modalOverlay = document.createElement("div");
-//   modalOverlay.className = "modal-overlay";
-//   bodyElem.appendChild(modalOverlay); // Lägg till i bodyn
-
-//   // Skapa modalen
-//   const editModal = document.createElement("div");
-//   editModal.className = "editModal";
-//   modalOverlay.appendChild(editModal); // Lägg till i modaleOverlay div:en
-
-//   // Titel
-//   const modalTitle = document.createElement("h3");
-//   modalTitle.textContent = "Redigera aktivitet";
-//   editModal.appendChild(modalTitle);
-
-//   // Skapa inputfält för beskrivning
-//   const editActivityLabel = document.createElement("label");
-//   editActivityLabel.setAttribute("for", "activityName");
-//   editActivityLabel.textContent = "Vad vill du göra?";
-//   editModal.appendChild(editActivityLabel);
-
-//   const editActivityInput = document.createElement("input");
-//   editActivityInput.id = "activityName";
-//   editActivityInput.type = "text";
-//   editActivityInput.defaultValue = activity.description; // Default nuvarande värde
-//   editModal.appendChild(editActivityInput);
-
-//   // Skapa en dropdown för kategori
-//   const editCategoryLabel = document.createElement("label");
-//   editCategoryLabel.setAttribute("for", "category");
-//   editCategoryLabel.textContent = "Välj kategori:";
-//   editModal.appendChild(editCategoryLabel);
-
-//   const categorySelect = document.createElement("select");
-//   categorySelect.id = "category";
-//   editModal.appendChild(categorySelect);
-
-//   const categories = ["Resor", "Äventyr", "Lärande", "Hobby", "Hemmafix"];
-//   categories.forEach((category) => {
-//     const option = document.createElement("option");
-//     option.value = category;
-//     option.textContent = category;
-//     option.defaultSelected = activity.category; // Default nuvarande värde
-//     categorySelect.appendChild(option);
-//   });
-
-//   // Lägg till en knapp för att stänga modalen
-//   const closeButton = document.createElement("button");
-//   closeButton.textContent = "Stäng";
-//   editModal.appendChild(closeButton);
-
-//   // Funktion för att stänga modalen
-//   closeButton.addEventListener("click", () => {
-//     modalOverlay.remove();
-//   });
-
-//   // Skapa en knapp för att spara ändringar
-//   const saveButton = document.createElement("button");
-//   saveButton.textContent = "Spara";
-//   editModal.appendChild(saveButton);
-
-//   saveButton.addEventListener("click", () => {
-//     const editInputValue = editActivityInput.value;
-//     activity.description = editInputValue;
-
-//     const editSelectValue = categorySelect.value;
-//     activity.category = editSelectValue;
-
-//     saveBucketListToLocalStorage();
-
-//     // Stäng modalen när ändringar är sparade
-//     modalOverlay.remove();
-
-//     // Rendera ut bucket list igen för att få en uppdaterad version
-//     // renderBucketList();
-
-// Eventlyssnare på Klarmarkera-knappen
-// newBtnElemDone.addEventListener("click", () => {
-// Kolla värdet på isDone
-// Ska gå att klicka igen om man klarmarkerat av misstag, och så knappen och texten återgå till ursprunglig text och style
-//   if (activity.isDone) {
-//     activity.isDone = false;
-//     newBtnElemDone.textContent = "Klar";
-//     newActivityNameElem.style.textDecoration = "none";
-//   } else {
-//     activity.isDone = true;
-//     newActivityNameElem.style.textDecoration = "line-through";
-//     newBtnElemDone.innerHTML = "<i class='fa fa-check'></i>";
-//   }
-
-//   saveBucketListToLocalStorage();
-// });
-
-// --------------------------------------------------------------------------------
-
-// --------------------------------------------------------------------------------
-
-// Sortera aktiviteterna i varje lista i bokstavsordning
-function sortActivitiesAlphabetically() {
-  // Hämta alla ul-element
-  const lists = document.querySelectorAll("ul"); // NodeList med ul.className
-
-  // Iterera över varje ul och sortera dess innehåll
-  lists.forEach((ul) => {
-    // Konverterar resultatet från en NodeList till en array. På den kan sedan sort användas
-    const listItems = Array.from(ul.querySelectorAll("li"));
-
-    // Sortera aktiviteterna i bokstavsordning
-    listItems.sort((a, b) => a.textContent.localeCompare(b.textContent));
-
-    // Omorganisera li-elementen/aktiviteterna i ul
-    listItems.forEach((li) => ul.appendChild(li));
-  });
-}
-
-sortActivitiesAlphabetically();
 
 // ADD NEW ACTIVITY --------------------------------------------------------------------------
 registerForm.addEventListener("submit", (event) => {
@@ -277,9 +164,28 @@ function addNewActivityToBucketList() {
   renderBucketList();
 }
 
+// MARK AN ACTIVITY AS DONE -------------------------------------------------------------------
+function markActivityAsDone(id) {
+  // Find the activity in bucketListInLocalStorage by id
+  const activityToMarkAsDone = bucketListInLocalStorage.find(
+    (activity) => activity.id === id
+  );
+
+  // Check if isDone are true or false
+  if (activityToMarkAsDone.isDone) {
+    activityToMarkAsDone.isDone = false;
+  } else {
+    activityToMarkAsDone.isDone = true;
+  }
+
+  // Save new list in local storage
+  saveBucketListToLocalStorage();
+
+  renderBucketList();
+}
+
 // DELETE AN ACTIVITY --------------------------------------------------------------------------
 function deleteActivity(id) {
-  //Remove from local storage
   // Find the activity in bucketListInLocalStorage by id
   const activityToDelete = bucketListInLocalStorage.find(
     (activity) => activity.id === id
@@ -289,7 +195,7 @@ function deleteActivity(id) {
   const indexInLocalStorage =
     bucketListInLocalStorage.indexOf(activityToDelete);
 
-  // Remove that index
+  // Remove that index from bucket list in local storage
   bucketListInLocalStorage.splice(indexInLocalStorage, 1);
 
   // Save new list in local storage
@@ -297,3 +203,117 @@ function deleteActivity(id) {
 
   renderBucketList();
 }
+
+// OPEN EDIT MODAL --------------------------------------------------------------------------
+function openEditModal(id) {
+  const activityToEdit = bucketListInLocalStorage.find(
+    (activity) => activity.id === id
+  );
+
+  // Background overlay
+  const modalOverlay = document.createElement("div");
+  modalOverlay.className = "modal-overlay";
+  bodyElem.appendChild(modalOverlay);
+
+  // Create the modal
+  const editModal = document.createElement("div");
+  editModal.className = "editModal";
+  modalOverlay.appendChild(editModal);
+
+  // Title
+  const modalTitle = document.createElement("h3");
+  modalTitle.textContent = "Redigera aktivitet";
+  editModal.appendChild(modalTitle);
+
+  // Label for input
+  const editActivityLabel = document.createElement("label");
+  editActivityLabel.setAttribute("for", "activityName");
+  editActivityLabel.textContent = "Vad vill du göra?";
+  editModal.appendChild(editActivityLabel);
+
+  // Input
+  const editActivityInput = document.createElement("input");
+  editActivityInput.id = "activityName";
+  editActivityInput.type = "text";
+  editActivityInput.defaultValue = activityToEdit.description;
+  editModal.appendChild(editActivityInput);
+
+  // Category dropdown
+  const editCategoryLabel = document.createElement("label");
+  editCategoryLabel.setAttribute("for", "category");
+  editCategoryLabel.textContent = "Välj kategori:";
+  editModal.appendChild(editCategoryLabel);
+
+  const categorySelect = document.createElement("select");
+  categorySelect.id = "category";
+  editModal.appendChild(categorySelect);
+
+  const categories = ["Resor", "Äventyr", "Lärande", "Hobby", "Hemmafix"]; // KAN DENNA FÅNGAS UPP DYNAMISKT FRÅN HTML??
+  categories.forEach((category) => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    option.defaultSelected = category === activityToEdit.category;
+    categorySelect.appendChild(option);
+  });
+
+  // Create a button to be able to close the modal
+  const closeButton = document.createElement("button");
+  closeButton.textContent = "Stäng";
+  editModal.appendChild(closeButton);
+
+  closeButton.addEventListener("click", () => {
+    modalOverlay.remove();
+  });
+
+  // Create save button
+  const saveButton = document.createElement("button");
+  saveButton.textContent = "Spara";
+  editModal.appendChild(saveButton);
+
+  saveButton.addEventListener("click", () => {
+    saveEdit(activityToEdit.id, editActivityInput.value, categorySelect.value);
+
+    // Close the modal
+    modalOverlay.remove();
+
+    // Rerender the bucketlist
+    renderBucketList();
+  });
+}
+
+// EDIT AN ACTIVITY ------------------------------------------------------------------
+function saveEdit(id, inputText, inputSelect) {
+  const activityToEdit = bucketListInLocalStorage.find(
+    (activity) => activity.id === id
+  );
+  // Save the input values
+  const editInputValue = inputText;
+  activityToEdit.description = editInputValue;
+
+  const editSelectValue = inputSelect;
+  activityToEdit.category = editSelectValue;
+
+  // Update list in LS
+  saveBucketListToLocalStorage();
+}
+
+// SORT ACTIVITES ------------------------------------------------------------------------
+function sortActivitiesAlphabetically() {
+  // Hämta alla ul-element
+  const lists = document.querySelectorAll("ul"); // NodeList med ul.className
+
+  // Iterera över varje ul och sortera dess innehåll
+  lists.forEach((ul) => {
+    // Konverterar resultatet från en NodeList till en array. På den kan sedan sort användas
+    const listItems = Array.from(ul.querySelectorAll("li"));
+
+    // Sortera aktiviteterna i bokstavsordning
+    listItems.sort((a, b) => a.textContent.localeCompare(b.textContent));
+
+    // Omorganisera li-elementen/aktiviteterna i ul
+    listItems.forEach((li) => ul.appendChild(li));
+  });
+}
+
+sortActivitiesAlphabetically();
