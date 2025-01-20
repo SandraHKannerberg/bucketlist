@@ -31,6 +31,15 @@ function saveBucketListToLocalStorage() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(bucketListInLocalStorage));
 }
 
+// Find activity by id in local storage
+function findActivityByIdInLocalStorage(id) {
+  const activityInLocalStorage = bucketListInLocalStorage.find(
+    (activity) => activity.id === id
+  );
+
+  return activityInLocalStorage;
+}
+
 // HANDLE CATEGORIES ----------------------------------------------------------------------------
 
 // Group categories
@@ -87,9 +96,14 @@ function renderBucketList() {
 
         // Delete button
         const newBtnElemDel = document.createElement("button");
-        newBtnElemDel.textContent = "Ta bort";
         newListItemElem.appendChild(newBtnElemDel);
         newBtnElemDel.className = "delBtn";
+        newBtnElemDel.setAttribute("aria-label", "Radera aktiviteten");
+
+        // Add trash-can icon to button
+        const newIconDelElem = document.createElement("i");
+        newIconDelElem.className = "fa-regular fa-trash-can";
+        newBtnElemDel.appendChild(newIconDelElem);
 
         // Eventlistener for delete
         newBtnElemDel.addEventListener("click", () => {
@@ -98,9 +112,14 @@ function renderBucketList() {
 
         // Edit button
         const newBtnElemEdit = document.createElement("button");
-        newBtnElemEdit.textContent = "Redigera";
         newListItemElem.appendChild(newBtnElemEdit);
         newBtnElemEdit.className = "editBtn";
+        newBtnElemEdit.setAttribute("aria-label", "Redigera aktiviteten");
+
+        // Add edit icon to button
+        const newIconEditElem = document.createElement("i");
+        newIconEditElem.className = "fa-regular fa-pen-to-square";
+        newBtnElemEdit.appendChild(newIconEditElem);
 
         // Eventlistener for mark as done
         newBtnElemEdit.addEventListener("click", () => {
@@ -111,10 +130,14 @@ function renderBucketList() {
         const newBtnElemDone = document.createElement("button");
         newListItemElem.appendChild(newBtnElemDone);
         newBtnElemDone.className = "doneBtn";
+        newBtnElemDone.setAttribute(
+          "aria-label",
+          "Markera aktiviteten som klar"
+        );
 
         // Add icon element to button
-        const newIconElem = document.createElement("i");
-        newBtnElemDone.appendChild(newIconElem);
+        const newIconDoneElem = document.createElement("i");
+        newBtnElemDone.appendChild(newIconDoneElem);
 
         // Eventlistener for mark as done
         newBtnElemDone.addEventListener("click", () => {
@@ -122,7 +145,7 @@ function renderBucketList() {
         });
 
         // Display different icons on the button based on the value of isDone
-        newIconElem.className = activity.isDone
+        newIconDoneElem.className = activity.isDone
           ? "fa-solid fa-arrow-rotate-left"
           : "fa fa-check";
       });
@@ -167,10 +190,7 @@ function addNewActivityToBucketList() {
 
 // MARK AN ACTIVITY AS DONE -------------------------------------------------------------------
 function markActivityAsDone(id) {
-  // Find the activity in bucketListInLocalStorage by id
-  const activityToMarkAsDone = bucketListInLocalStorage.find(
-    (activity) => activity.id === id
-  );
+  const activityToMarkAsDone = findActivityByIdInLocalStorage(id);
 
   // Check if isDone are true or false
   if (activityToMarkAsDone.isDone) {
@@ -187,10 +207,7 @@ function markActivityAsDone(id) {
 
 // DELETE AN ACTIVITY --------------------------------------------------------------------------
 function deleteActivity(id) {
-  // Find the activity in bucketListInLocalStorage by id
-  const activityToDelete = bucketListInLocalStorage.find(
-    (activity) => activity.id === id
-  );
+  const activityToDelete = findActivityByIdInLocalStorage(id);
 
   // Check the index
   const indexInLocalStorage =
@@ -207,9 +224,7 @@ function deleteActivity(id) {
 
 // OPEN EDIT MODAL --------------------------------------------------------------------------
 function openEditModal(id) {
-  const activityToEdit = bucketListInLocalStorage.find(
-    (activity) => activity.id === id
-  );
+  const activityToEdit = findActivityByIdInLocalStorage(id);
 
   // Background overlay
   const modalOverlay = document.createElement("div");
@@ -285,9 +300,8 @@ function openEditModal(id) {
 
 // EDIT AN ACTIVITY ------------------------------------------------------------------
 function saveEdit(id, inputText, inputSelect) {
-  const activityToEdit = bucketListInLocalStorage.find(
-    (activity) => activity.id === id
-  );
+  const activityToEdit = findActivityByIdInLocalStorage(id);
+
   // Save the input values
   const editInputValue = inputText;
   activityToEdit.description = editInputValue;
