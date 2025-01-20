@@ -5,6 +5,16 @@ const activityCategorySelect = document.getElementById("activityCategory");
 const registerForm = document.querySelector("#bucketForm");
 const bodyElem = document.querySelector("body");
 
+// OPTIONS FOR CATEGORIES
+const categories = ["Resor", "Äventyr", "Lärande", "Hobby", "Hemmafix"];
+
+const categoryOption = categories.forEach((category) => {
+  const option = document.createElement("option");
+  option.value = category;
+  option.textContent = category;
+  activityCategorySelect.appendChild(option);
+});
+
 // INIT --------------------------------------------------------------------------------------------
 
 function init() {
@@ -264,7 +274,6 @@ function openEditModal(id) {
   categorySelect.id = "category";
   editModal.appendChild(categorySelect);
 
-  const categories = ["Resor", "Äventyr", "Lärande", "Hobby", "Hemmafix"]; // KAN DENNA FÅNGAS UPP DYNAMISKT FRÅN HTML??
   categories.forEach((category) => {
     const option = document.createElement("option");
     option.value = category;

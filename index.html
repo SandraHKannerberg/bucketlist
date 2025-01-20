@@ -26,16 +26,11 @@
           placeholder="Vad vill du göra?"
           required
         />
-        <label for="activityCategory" class="visually-hidden"
+        <label for="activityCategory" class="visually-hidden category-label"
           >Välj kategori</label
         >
-        <select id="activityCategory">
-          <option value="Välj kategori">--Välj kategori--</option>
-          <option value="Resor">Resor</option>
-          <option value="Äventyr">Äventyr</option>
-          <option value="Lärande">Lärande</option>
-          <option value="Hobby">Hobby</option>
-          <option value="Hemmafix">Hemmafix</option>
+        <select id="activityCategory" required>
+          <option value="" disabled selected>--Välj kategori--</option>
         </select>
         <button type="submit">Lägg till</button>
       </form>
