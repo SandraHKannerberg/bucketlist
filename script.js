@@ -1,19 +1,32 @@
 // VARIABLES FROM THE HTML-FILE ---------------------------------------------------------------------------------
 const bucketListsElem = document.getElementById("bucketLists");
+const bucketFormElem = document.getElementById("bucketForm");
+const activityInputLabel = document.querySelector(".activityNameLabel");
 const activityInput = document.getElementById("activityName");
+const categorySelectLabel = document.querySelector(".categoryLabel");
 const activityCategorySelect = document.getElementById("activityCategory");
 const registerForm = document.querySelector("#bucketForm");
 const bodyElem = document.querySelector("body");
 
-// OPTIONS FOR CATEGORIES
+// AVAILABLE CATEGORIES
 const categories = ["Resor", "Äventyr", "Lärande", "Hobby", "Hemmafix"];
 
-const categoryOption = categories.forEach((category) => {
-  const option = document.createElement("option");
-  option.value = category;
-  option.textContent = category;
-  activityCategorySelect.appendChild(option);
-});
+// MAKE EACH CATEGORY AN OPTION ELEMENT
+function createCategoryOptions(categories, selectedCategory = null) {
+  return categories.map((category) => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    if (category === selectedCategory) {
+      option.selected = true;
+    }
+    return option;
+  });
+}
+
+// RENDER CATEGORY OPTIONS IN SELECT IN BUCKETFORM
+const categoryOptions = createCategoryOptions(categories);
+categoryOptions.forEach((option) => activityCategorySelect.appendChild(option));
 
 // INIT --------------------------------------------------------------------------------------------
 
@@ -251,36 +264,40 @@ function openEditModal(id) {
   modalTitle.textContent = "Redigera aktivitet";
   editModal.appendChild(modalTitle);
 
+  // Form
+  const editFormElem = document.createElement("form");
+  editFormElem.id = "editForm";
+  editFormElem.className = "editForm";
+  editModal.appendChild(editFormElem);
+
   // Label for input
   const editActivityLabel = document.createElement("label");
   editActivityLabel.setAttribute("for", "activityName");
   editActivityLabel.textContent = "Vad vill du göra?";
-  editModal.appendChild(editActivityLabel);
+  editFormElem.appendChild(editActivityLabel);
 
   // Input
   const editActivityInput = document.createElement("input");
   editActivityInput.id = "activityName";
   editActivityInput.type = "text";
   editActivityInput.defaultValue = activityToEdit.description;
-  editModal.appendChild(editActivityInput);
+  editFormElem.appendChild(editActivityInput);
 
   // Category dropdown
   const editCategoryLabel = document.createElement("label");
   editCategoryLabel.setAttribute("for", "category");
   editCategoryLabel.textContent = "Välj kategori:";
-  editModal.appendChild(editCategoryLabel);
+  editFormElem.appendChild(editCategoryLabel);
 
   const categorySelect = document.createElement("select");
   categorySelect.id = "category";
-  editModal.appendChild(categorySelect);
+  editFormElem.appendChild(categorySelect);
 
-  categories.forEach((category) => {
-    const option = document.createElement("option");
-    option.value = category;
-    option.textContent = category;
-    option.defaultSelected = category === activityToEdit.category;
-    categorySelect.appendChild(option);
-  });
+  const modalCategoryOptions = createCategoryOptions(
+    categories,
+    activityToEdit.category
+  );
+  modalCategoryOptions.forEach((option) => categorySelect.appendChild(option));
 
   // Create a button to be able to close the modal
   const closeButton = document.createElement("button");
@@ -293,10 +310,15 @@ function openEditModal(id) {
 
   // Create save button
   const saveButton = document.createElement("button");
+  saveButton.setAttribute("type", "submit");
   saveButton.textContent = "Spara";
-  editModal.appendChild(saveButton);
 
-  saveButton.addEventListener("click", () => {
+  editFormElem.appendChild(saveButton);
+
+  // Eventlistener on edit form
+  editFormElem.addEventListener("submit", (event) => {
+    event.preventDefault();
+
     saveEdit(activityToEdit.id, editActivityInput.value, categorySelect.value);
 
     // Close the modal

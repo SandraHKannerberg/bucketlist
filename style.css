@@ -27,7 +27,6 @@
 body {
   background-color: #fefaf6;
   color: #3c3d37;
-  /* font-family: Arial, sans-serif; */
   font-family: "Poppins", serif;
   display: flex;
   flex-direction: column;
@@ -104,6 +103,11 @@ button {
   color: #75a47f;
   border: 2px solid #75a47f;
   background-color: #fefaf6;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
 }
 
 h1 {
