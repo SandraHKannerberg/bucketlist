@@ -117,9 +117,13 @@ function renderBucketList() {
         newActivityNameElem.textContent = activity.description;
         newListItemElem.appendChild(newActivityNameElem);
 
+        const newIconsContainerElem = document.createElement("div");
+        newIconsContainerElem.className = "icons-container hovered";
+        newListItemElem.appendChild(newIconsContainerElem);
+
         // Delete button
         const newBtnElemDel = document.createElement("button");
-        newListItemElem.appendChild(newBtnElemDel);
+        newIconsContainerElem.appendChild(newBtnElemDel);
         newBtnElemDel.className = "delBtn";
         newBtnElemDel.setAttribute("aria-label", "Radera aktiviteten");
 
@@ -135,7 +139,7 @@ function renderBucketList() {
 
         // Edit button
         const newBtnElemEdit = document.createElement("button");
-        newListItemElem.appendChild(newBtnElemEdit);
+        newIconsContainerElem.appendChild(newBtnElemEdit);
         newBtnElemEdit.className = "editBtn";
         newBtnElemEdit.setAttribute("aria-label", "Redigera aktiviteten");
 
@@ -151,7 +155,7 @@ function renderBucketList() {
 
         // "Mark as done" button
         const newBtnElemDone = document.createElement("button");
-        newListItemElem.appendChild(newBtnElemDone);
+        newIconsContainerElem.appendChild(newBtnElemDone);
         newBtnElemDone.className = "doneBtn";
         newBtnElemDone.setAttribute(
           "aria-label",
@@ -302,6 +306,7 @@ function openEditModal(id) {
   // Create a button to be able to close the modal
   const closeButton = document.createElement("button");
   closeButton.textContent = "Stäng";
+  closeButton.className = "closeBtn";
   editModal.appendChild(closeButton);
 
   closeButton.addEventListener("click", () => {
@@ -312,6 +317,7 @@ function openEditModal(id) {
   const saveButton = document.createElement("button");
   saveButton.setAttribute("type", "submit");
   saveButton.textContent = "Spara";
+  saveButton.className = "ctaBtn";
 
   editFormElem.appendChild(saveButton);
 
