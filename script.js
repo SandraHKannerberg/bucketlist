@@ -34,12 +34,12 @@ document.addEventListener("DOMContentLoaded", init);
 
 // HANDLE LOCAL STORAGE ----------------------------------------------------------------------------
 const LIST_KEY = "bucketListInLS"; // Save the name of my list in local storage as a key
-let bucketListFromLS = [];
+let bucketListFromLS = []; // Start with an empty array
 
 // Load list from local storage
 function loadBucketListFromLS(LIST_KEY) {
   const data = localStorage.getItem(LIST_KEY);
-  return (list = data ? JSON.parse(data) : []);
+  return (bucketList = data ? JSON.parse(data) : []);
 }
 
 // Save list to local storage
