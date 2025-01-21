@@ -17,21 +17,22 @@
     </header>
     <main>
       <form id="bucketForm">
+        <label for="activityName" class="visually-hidden activityNameLabel"
+          >Vad vill du göra?</label
+        >
         <input
           type="text"
           id="activityName"
           placeholder="Vad vill du göra?"
           required
         />
-        <select id="activityCategory">
-          <option value="Välj kategori">--Välj kategori--</option>
-          <option value="Resor">Resor</option>
-          <option value="Äventyr">Äventyr</option>
-          <option value="Lärande">Lärande</option>
-          <option value="Hobby">Hobby</option>
-          <option value="Hemmafix">Hemmafix</option>
+        <label for="activityCategory" class="visually-hidden categoryLabel"
+          >Välj kategori</label
+        >
+        <select id="activityCategory" required>
+          <option value="" disabled selected>--Välj kategori--</option>
         </select>
-        <button type="submit">Lägg till</button>
+        <button type="submit" class="ctaBtn">Lägg till</button>
       </form>
       <section id="bucketLists"></section>
     </main>

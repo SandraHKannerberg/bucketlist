@@ -1,339 +1,346 @@
-// Starta med en tom array som håller alla aktiviteter
-// Behöver inte denna då jag gått vidare till uppgiften på Level ups nivå med localStorage, så min lista sparas där och det är den jag utgår ifrån
-
-// const bucketList = [];
-
-// ---------------------------------------------------------------------------------
-
-// Variabler jag behöver fånga upp från HTML
+// VARIABLES FROM THE HTML-FILE ---------------------------------------------------------------------------------
 const bucketListsElem = document.getElementById("bucketLists");
 const activityInput = document.getElementById("activityName");
 const activityCategorySelect = document.getElementById("activityCategory");
-const registerForm = document.querySelector("#bucketForm");
+const bucketForm = document.querySelector("#bucketForm");
 const bodyElem = document.querySelector("body");
 
-// ------------------------------------------------------------------------------
+// AVAILABLE CATEGORIES ---------------------------------------------------------------------------------------
+const categories = ["Resor", "Äventyr", "Lärande", "Hobby", "Hemmafix"];
 
-// Kör funktion för att rendera ut bucket list direkt när sidan öppnas / laddas om
-renderBucketList();
-
-// ----------------------------------------------------------------------------
-
-// Funktion som får fram vilka kategorier som finns med i listan
-function printActivityCategories(bucketListInLocalStorage) {
-  bucketListsElem.innerHTML = "";
-  // Skapa en uppsättning för att lagra unika kategorier
-  const categories = new Set();
-
-  // Loopar igenom aktiviteterna
-  bucketListInLocalStorage.forEach((activity) => {
-    if (activity.category) {
-      categories.add(activity.category); // Lägg till kategorin i setet
+// MAKE EACH CATEGORY AN OPTION ELEMENT -------------------------------------------------------------------------
+function createCategoryOptions(categories, selectedCategory = null) {
+  return categories.map((category) => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    if (category === selectedCategory) {
+      option.selected = true;
     }
-  });
-
-  // Skriv ut kategorierna
-  categories.forEach((category) => {
-    // Skapa och lägg till h2 som rubrik för varje kategori
-    const newCategoryHeading = document.createElement("h2");
-
-    // Tilldela ett className
-    newCategoryHeading.className = "categoryHeading";
-
-    // Tilldela innehåll
-    newCategoryHeading.textContent = category;
-
-    // Lägg till elementet
-    bucketListsElem.appendChild(newCategoryHeading);
-
-    // Skapa och lägg till en ul för varje kategori. Dessa ska sedan lista alla aktiviteter inom varje kategori
-    const newUlElem = document.createElement("ul");
-
-    // Översätter de svenska kategorierna till engelska då jag vill ha min className på engelska
-    const categoryTranslations = {
-      resor: "trips",
-      äventyr: "adventures",
-      lärande: "learning",
-      hobby: "hobby",
-      hemmafix: "renovation",
-    };
-
-    const englishClassName =
-      categoryTranslations[category.toLowerCase()] || "unknown";
-
-    // Tilldelar det engelska className till de nya listorna som skapas
-    newUlElem.className = englishClassName;
-
-    // Lägger till listan i DOM:en
-    bucketListsElem.appendChild(newUlElem);
+    return option;
   });
 }
 
-// -----------------------------------------------------------------------------
+// RENDER THE CATEGORY OPTIONS -------------------------------------------------------------------------
+const categoryOptions = createCategoryOptions(categories);
+categoryOptions.forEach((option) => activityCategorySelect.appendChild(option));
 
-// Skapa en funktion som ritar upp listan dynamiskt i DOM
-function renderBucketList() {
-  // Hämta listan från local storage och spara i en variabel
-  const bucketListInLocalStorage = JSON.parse(
-    localStorage.getItem("bucketListInLocalStorage")
-  );
+// INIT FUNCTION --------------------------------------------------------------------------------------------
+function init() {
+  renderBucketListToUI();
+}
 
-  if (!bucketListInLocalStorage) {
-    console.log("Inget att visa");
-  } else {
-    // Kör funktionen för att kolla kategorier
-    printActivityCategories(bucketListInLocalStorage);
+document.addEventListener("DOMContentLoaded", init);
+
+// HANDLE LOCAL STORAGE ----------------------------------------------------------------------------
+const LIST_KEY = "bucketListInLS"; // Save the name of my list in local storage as a key
+let bucketListFromLS = []; // Start with an empty array
+
+// Load list from local storage
+function loadBucketListFromLS(LIST_KEY) {
+  const data = localStorage.getItem(LIST_KEY);
+  return (bucketList = data ? JSON.parse(data) : []);
+}
+
+// Save list to local storage
+function saveBucketListToLS(LIST_KEY, bucketList) {
+  localStorage.setItem(LIST_KEY, JSON.stringify(bucketList));
+}
+
+// Find activity by id in local storage
+const findActivityByIdInLS = (id) =>
+  bucketListFromLS.find((activity) => activity.id === id);
+
+// HANDLE CATEGORIES ----------------------------------------------------------------------------
+let groupedCategories = [];
+
+// Group categories
+function updateGroupedCategories() {
+  groupedCategories = bucketListFromLS.reduce((acc, activity) => {
+    // Find the category object in the accumulator
+    let categoryObj = acc.find((group) => group.category === activity.category);
+
+    if (!categoryObj) {
+      // If the category doesn't exist, create a new one
+      categoryObj = { category: activity.category, activities: [] };
+      acc.push(categoryObj);
+    }
+
+    // Add the activity to the right category object
+    categoryObj.activities.push(activity);
+
+    return acc;
+  }, []);
+}
+
+// RENDER BUCKET LIST ---------------------------------------------------------------------------
+function renderBucketListToUI() {
+  bucketListsElem.innerHTML = "";
+
+  // Existing list in local storage?
+  bucketListFromLS = loadBucketListFromLS(LIST_KEY);
+
+  // Is there a list? Go to:
+  if (bucketListFromLS) {
+    updateGroupedCategories();
+    sortActivitiesAlphabetically;
   }
 
-  // Översätt kategorierna
-  const categoryTranslations = {
-    resor: "trips",
-    äventyr: "adventures",
-    lärande: "learning",
-    hobby: "hobby",
-    hemmafix: "renovation",
-  };
+  // use the groupedCategory list as a basis for the rendering UI
+  if (groupedCategories) {
+    groupedCategories.forEach((category) => {
+      // Create h2 for every category
+      const newCategoryHeading = document.createElement("h2");
+      newCategoryHeading.className = "categoryHeading";
+      newCategoryHeading.textContent = category.category;
+      bucketListsElem.appendChild(newCategoryHeading);
 
-  // Om listan finns i local storage kör:
-  if (bucketListInLocalStorage) {
-    bucketListInLocalStorage.forEach((activity) => {
-      // Matchar översättningen den aktuella aktivitetens kategori?
-      const translatedCategory =
-        categoryTranslations[activity.category.toLowerCase()];
+      // Create an ul for every category
+      const newUlElem = document.createElement("ul");
+      bucketListsElem.appendChild(newUlElem);
 
-      // Hitta UL-elementet baserat på den översatta kategorin
-      const ulMatchingTheCatgeory = document.querySelector(
-        `ul.${translatedCategory}`
-      );
+      // Nested loop to access the activities
+      category.activities.forEach((activity) => {
+        // New listitem for every activity
+        const newListItemElem = document.createElement("li");
+        newUlElem.appendChild(newListItemElem);
 
-      // Ny li för varje aktivitet
-      const newListItemElem = document.createElement("li");
+        // Description - activity name
+        const newActivityNameElem = document.createElement("p");
+        newActivityNameElem.textContent = activity.description;
+        newListItemElem.appendChild(newActivityNameElem);
 
-      // Ett p-element för att skriva ut beskrivningen
-      const newActivityNameElem = document.createElement("p");
-      newActivityNameElem.textContent = activity.description;
-      newListItemElem.appendChild(newActivityNameElem);
+        // Display different textdecoration depending on isDone property
+        newActivityNameElem.style.textDecoration = activity.isDone
+          ? "line-through"
+          : "none";
 
-      // En knapp för att ta bort aktiviteten från listan
-      const newBtnElemDel = document.createElement("button");
-      newBtnElemDel.textContent = "Ta bort";
-      newListItemElem.appendChild(newBtnElemDel);
-      newBtnElemDel.className = "delBtn";
+        // Container for the icon-buttons
+        const newIconsContainerElem = document.createElement("div");
+        newIconsContainerElem.className = "icons-container hovered";
+        newListItemElem.appendChild(newIconsContainerElem);
 
-      // Eventlyssnare på Ta bort-knappen
-      newBtnElemDel.addEventListener("click", () => {
-        // Vilket index har aktiviteten jag vill ta bort?
-        const index = bucketListInLocalStorage.indexOf(activity);
+        // Delete button
+        const newBtnElemDel = document.createElement("button");
+        newIconsContainerElem.appendChild(newBtnElemDel);
+        newBtnElemDel.className = "delBtn";
+        newBtnElemDel.setAttribute("aria-label", "Radera aktiviteten");
 
-        // Ta bort aktiviteten och uppdatera listan i LS
-        bucketListInLocalStorage.splice(index, 1);
+        // Add trash-can icon to button
+        const newIconDelElem = document.createElement("i");
+        newIconDelElem.className = "fa-regular fa-trash-can";
+        newBtnElemDel.appendChild(newIconDelElem);
 
-        localStorage.setItem(
-          "bucketListInLocalStorage",
-          JSON.stringify(bucketListInLocalStorage)
+        // Eventlistener for delete
+        newBtnElemDel.addEventListener("click", () => {
+          deleteActivity(activity.id);
+        });
+
+        // Edit button
+        const newBtnElemEdit = document.createElement("button");
+        newIconsContainerElem.appendChild(newBtnElemEdit);
+        newBtnElemEdit.className = "editBtn";
+        newBtnElemEdit.setAttribute("aria-label", "Redigera aktiviteten");
+
+        // Add edit icon to button
+        const newIconEditElem = document.createElement("i");
+        newIconEditElem.className = "fa-regular fa-pen-to-square";
+        newBtnElemEdit.appendChild(newIconEditElem);
+
+        // Eventlistener for mark as done
+        newBtnElemEdit.addEventListener("click", () => {
+          openEditModal(activity.id);
+        });
+
+        // "Mark as done" button
+        const newBtnElemDone = document.createElement("button");
+        newIconsContainerElem.appendChild(newBtnElemDone);
+        newBtnElemDone.className = "doneBtn";
+        newBtnElemDone.setAttribute(
+          "aria-label",
+          "Markera aktiviteten som klar"
         );
 
-        // Rendera ut bucket list igen för att få en uppdaterad version
-        renderBucketList();
-      });
+        // Add icon element to button
+        const newIconDoneElem = document.createElement("i");
+        newBtnElemDone.appendChild(newIconDoneElem);
 
-      // En knapp för att redigera aktiviteten
-      const newBtnElemEdit = document.createElement("button");
-      newBtnElemEdit.textContent = "Redigera";
-      newListItemElem.appendChild(newBtnElemEdit);
-      newBtnElemEdit.className = "editBtn";
-
-      // Eventlyssnare på Redigera-knappen denna ska egentligen bara öppna modalen för att ändra. Ändringarna sparas först när Spara-knappen triggas
-      newBtnElemEdit.addEventListener("click", () => {
-        // Vilket index har aktiviteten jag vill redigera?
-        const index = bucketListInLocalStorage.indexOf(activity);
-
-        // Redigera modalen ---------------------------------
-        // Skapa modalens bakgrund (overlay)
-        const modalOverlay = document.createElement("div");
-        modalOverlay.className = "modal-overlay";
-        bodyElem.appendChild(modalOverlay); // Lägg till i bodyn
-
-        // Skapa modalen
-        const editModal = document.createElement("div");
-        editModal.className = "editModal";
-        modalOverlay.appendChild(editModal); // Lägg till i modaleOverlay div:en
-
-        // Titel
-        const modalTitle = document.createElement("h3");
-        modalTitle.textContent = "Redigera aktivitet";
-        editModal.appendChild(modalTitle);
-
-        // Skapa inputfält för beskrivning
-        const editActivityLabel = document.createElement("label");
-        editActivityLabel.setAttribute("for", "activityName");
-        editActivityLabel.textContent = "Vad vill du göra?";
-        editModal.appendChild(editActivityLabel);
-
-        const editActivityInput = document.createElement("input");
-        editActivityInput.id = "activityName";
-        editActivityInput.type = "text";
-        editActivityInput.placeholder = activity.description; // Default nuvarande värde
-        editModal.appendChild(editActivityInput);
-
-        // Skapa en dropdown för kategori
-        const editCategoryLabel = document.createElement("label");
-        editCategoryLabel.setAttribute("for", "category");
-        editCategoryLabel.textContent = "Välj kategori:";
-        editModal.appendChild(editCategoryLabel);
-
-        const categorySelect = document.createElement("select");
-        categorySelect.id = "category";
-        editModal.appendChild(categorySelect);
-
-        const categories = ["Resor", "Äventyr", "Lärande", "Hobby", "Hemmafix"];
-        categories.forEach((category) => {
-          const option = document.createElement("option");
-          option.value = category;
-          option.textContent = category;
-          option.defaultSelected = activity.category; // Default nuvarande värde
-          categorySelect.appendChild(option);
+        // Eventlistener for mark as done
+        newBtnElemDone.addEventListener("click", () => {
+          markActivityAsDone(activity.id);
         });
 
-        // Lägg till en knapp för att stänga modalen
-        const closeButton = document.createElement("button");
-        closeButton.textContent = "Stäng";
-        editModal.appendChild(closeButton);
-
-        // Funktion för att stänga modalen
-        closeButton.addEventListener("click", () => {
-          modalOverlay.remove();
-        });
-
-        // Skapa en knapp för att spara ändringar
-        const saveButton = document.createElement("button");
-        saveButton.textContent = "Spara";
-        editModal.appendChild(saveButton);
-
-        saveButton.addEventListener("click", () => {
-          const editInputValue = editActivityInput.value;
-          activity.description = editInputValue;
-
-          const editSelectValue = categorySelect.value;
-          activity.category = editSelectValue;
-
-          localStorage.setItem(
-            "bucketListInLocalStorage",
-            JSON.stringify(bucketListInLocalStorage)
-          );
-
-          // Stäng modalen när ändringar är sparade
-          modalOverlay.remove();
-
-          // Rendera ut bucket list igen för att få en uppdaterad version
-          renderBucketList();
-        });
+        // Display different icons on the button based on the value of isDone
+        newIconDoneElem.className = activity.isDone
+          ? "fa-solid fa-arrow-rotate-left"
+          : "fa fa-check";
       });
-
-      // En knapp för att klarmarkera aktiviteten
-      const newBtnElemDone = document.createElement("button");
-      newListItemElem.appendChild(newBtnElemDone);
-      newBtnElemDone.className = "doneBtn";
-
-      // Dynamiskt innehåll på knappen beroende på om aktiviteten är markerad som isDone eller inte. Klar visas när isDone = false, isDone = true visar checkmark istället.
-      if (!activity.isDone) {
-        newBtnElemDone.textContent = "Klar";
-      } else {
-        newBtnElemDone.innerHTML = "<i class='fa fa-check'></i>";
-        newActivityNameElem.style.textDecoration = "line-through";
-      }
-
-      // Eventlyssnare på Klarmarkera-knappen
-      newBtnElemDone.addEventListener("click", () => {
-        // Kolla värdet på isDone
-        // Ska gå att klicka igen om man klarmarkerat av misstag, och så knappen och texten återgå till ursprunglig text och style
-        if (activity.isDone) {
-          activity.isDone = false;
-          newBtnElemDone.textContent = "Klar";
-          newActivityNameElem.style.textDecoration = "none";
-        } else {
-          activity.isDone = true;
-          newActivityNameElem.style.textDecoration = "line-through";
-          newBtnElemDone.innerHTML = "<i class='fa fa-check'></i>";
-        }
-
-        // Uppdatera listan i LS
-        localStorage.setItem(
-          "bucketListInLocalStorage",
-          JSON.stringify(bucketListInLocalStorage)
-        );
-      });
-
-      // Lägg till aktiviteten/ nytt listItem i den listan med rätt kategori för aktiviteten
-      ulMatchingTheCatgeory.appendChild(newListItemElem);
-      // --------------------------------------------------------
     });
   }
 }
 
-// --------------------------------------------------------------------------------
-
-// Lägg till en eventlyssnare på formuläret för att lägga till nya aktiviteter
-
-// Eventlyssnare
-registerForm.addEventListener("submit", (event) => {
-  event.preventDefault(); // Förhindra att sidan laddas om
-  addNewActivityToBucketList(); // Kör funktionen för att lägga till aktiviteten i bucketList
+// ADD NEW ACTIVITY --------------------------------------------------------------------------
+bucketForm.addEventListener("submit", (event) => {
+  event.preventDefault(); // Prevent page reload
+  addNewActivityToBucketList();
 });
 
-// Funktionen som ska triggas av eventlyssnaren submit
 function addNewActivityToBucketList() {
-  // Skapa objektet
+  // Calculate id of new activity
+  const id = "id" + Math.random().toString(16).slice(2);
+
+  // Save the object
   const activity = {
+    id: id,
     description: activityInput.value,
     category: activityCategorySelect.value,
     isDone: false,
   };
 
-  // Checka av om listan finns sparad i localStorage
-  if (!localStorage.getItem("bucketListInLocalStorage")) {
-    // Om ingen lista finns sparad i LS - spara listan innehållandes aktiviteten
-    localStorage.setItem(
-      "bucketListInLocalStorage",
-      JSON.stringify([activity])
-    );
-  } else {
-    // Om det redan finns en lista - pusha den nya aktiviteten till befintlig lista
-    const bucketListInLocalStorage = JSON.parse(
-      localStorage.getItem("bucketListInLocalStorage")
-    );
-    bucketListInLocalStorage.push(activity);
-    localStorage.setItem(
-      "bucketListInLocalStorage",
-      JSON.stringify(bucketListInLocalStorage)
-    );
-  }
+  // Add the activity to the array and save to local storage
+  bucketListFromLS.push(activity);
+  saveBucketListToLS(LIST_KEY, bucketListFromLS);
 
-  // Återställ formulären
+  // Reset the form
   activityInput.value = "";
-  activityCategorySelect.value = "Resor";
+  activityCategorySelect.value = "";
 
-  renderBucketList();
+  renderBucketListToUI();
 }
 
-// --------------------------------------------------------------------------------
+// MARK AN ACTIVITY AS DONE -------------------------------------------------------------------
+function markActivityAsDone(id) {
+  const activityToMarkAsDone = findActivityByIdInLS(id);
 
-// Sortera aktiviteterna i varje lista i bokstavsordning
-function sortActivitiesAlphabetically() {
-  // Hämta alla ul-element
-  const lists = document.querySelectorAll("ul"); // NodeList med ul.className
+  // Toggle the isDone property
+  activityToMarkAsDone.isDone = !activityToMarkAsDone.isDone;
 
-  // Iterera över varje ul och sortera dess innehåll
-  lists.forEach((ul) => {
-    // Konverterar resultatet från en NodeList till en array. På den kan sedan sort användas
-    const listItems = Array.from(ul.querySelectorAll("li"));
+  // Save new list in local storage and render the updated list to the UI
+  saveBucketListToLS(LIST_KEY, bucketListFromLS);
+  renderBucketListToUI();
+}
 
-    // Sortera aktiviteterna i bokstavsordning
-    listItems.sort((a, b) => a.textContent.localeCompare(b.textContent));
+// DELETE AN ACTIVITY --------------------------------------------------------------------------
+function deleteActivity(id) {
+  const activityToDelete = findActivityByIdInLS(id);
 
-    // Omorganisera li-elementen/aktiviteterna i ul
-    listItems.forEach((li) => ul.appendChild(li));
+  // Check the index
+  const indexInLS = bucketListFromLS.indexOf(activityToDelete);
+
+  // Remove that index from bucket list in local storage
+  bucketListFromLS.splice(indexInLS, 1);
+
+  // Save new list in local storage and render the updated list to the UI
+  saveBucketListToLS(LIST_KEY, bucketListFromLS);
+  renderBucketListToUI();
+}
+
+// OPEN EDIT MODAL --------------------------------------------------------------------------
+function openEditModal(id) {
+  const activityToEdit = findActivityByIdInLS(id);
+
+  // Background overlay
+  const modalOverlay = document.createElement("div");
+  modalOverlay.className = "modal-overlay";
+  bodyElem.appendChild(modalOverlay);
+
+  // Create the modal
+  const editModal = document.createElement("div");
+  editModal.className = "editModal";
+  modalOverlay.appendChild(editModal);
+
+  // Title
+  const modalTitle = document.createElement("h3");
+  modalTitle.textContent = "Redigera aktivitet";
+  editModal.appendChild(modalTitle);
+
+  // Form
+  const editFormElem = document.createElement("form");
+  editFormElem.id = "editForm";
+  editFormElem.className = "editForm";
+  editModal.appendChild(editFormElem);
+
+  // Label for input
+  const editActivityLabel = document.createElement("label");
+  editActivityLabel.setAttribute("for", "activityName");
+  editActivityLabel.textContent = "Vad vill du göra?";
+  editFormElem.appendChild(editActivityLabel);
+
+  // Input
+  const editActivityInput = document.createElement("input");
+  editActivityInput.id = "activityName";
+  editActivityInput.type = "text";
+  editActivityInput.defaultValue = activityToEdit.description;
+  editFormElem.appendChild(editActivityInput);
+
+  // Category dropdown
+  const editCategoryLabel = document.createElement("label");
+  editCategoryLabel.setAttribute("for", "category");
+  editCategoryLabel.textContent = "Välj kategori:";
+  editFormElem.appendChild(editCategoryLabel);
+
+  const categorySelect = document.createElement("select");
+  categorySelect.id = "category";
+  editFormElem.appendChild(categorySelect);
+
+  const modalCategoryOptions = createCategoryOptions(
+    categories,
+    activityToEdit.category
+  );
+  modalCategoryOptions.forEach((option) => categorySelect.appendChild(option));
+
+  // Create a button to be able to close the modal
+  const closeButton = document.createElement("button");
+  closeButton.textContent = "Stäng";
+  closeButton.className = "closeBtn";
+  editModal.appendChild(closeButton);
+
+  closeButton.addEventListener("click", () => {
+    modalOverlay.remove();
+  });
+
+  // Create save button
+  const saveButton = document.createElement("button");
+  saveButton.setAttribute("type", "submit");
+  saveButton.textContent = "Spara";
+  saveButton.className = "ctaBtn";
+
+  editFormElem.appendChild(saveButton);
+
+  // Eventlistener on edit form
+  editFormElem.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    saveEdit(activityToEdit.id, editActivityInput.value, categorySelect.value);
+
+    // Close the modal
+    modalOverlay.remove();
+
+    // Rerender the bucketlist
+    renderBucketListToUI();
   });
 }
 
-sortActivitiesAlphabetically();
+// EDIT AN ACTIVITY ------------------------------------------------------------------
+function saveEdit(id, inputText, inputSelect) {
+  const activityToEdit = findActivityByIdInLS(id);
+
+  // Save the input values
+  const editInputValue = inputText;
+  activityToEdit.description = editInputValue;
+
+  const editSelectValue = inputSelect;
+  activityToEdit.category = editSelectValue;
+
+  // Save updates to list in local storage
+  saveBucketListToLS(LIST_KEY, bucketListFromLS);
+}
+
+// SORT ACTIVITES ------------------------------------------------------------------------
+function sortActivitiesAlphabetically() {
+  groupedCategories.forEach((activity) => {
+    activity.activities.sort((a, b) =>
+      a.description.localeCompare(b.description)
+    );
+  });
+}
