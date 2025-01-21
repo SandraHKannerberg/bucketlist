@@ -1,17 +1,14 @@
 // VARIABLES FROM THE HTML-FILE ---------------------------------------------------------------------------------
 const bucketListsElem = document.getElementById("bucketLists");
-const bucketFormElem = document.getElementById("bucketForm");
-const activityInputLabel = document.querySelector(".activityNameLabel");
 const activityInput = document.getElementById("activityName");
-const categorySelectLabel = document.querySelector(".categoryLabel");
 const activityCategorySelect = document.getElementById("activityCategory");
-const registerForm = document.querySelector("#bucketForm");
+const bucketForm = document.querySelector("#bucketForm");
 const bodyElem = document.querySelector("body");
 
-// AVAILABLE CATEGORIES
+// AVAILABLE CATEGORIES ---------------------------------------------------------------------------------------
 const categories = ["Resor", "Äventyr", "Lärande", "Hobby", "Hemmafix"];
 
-// MAKE EACH CATEGORY AN OPTION ELEMENT
+// MAKE EACH CATEGORY AN OPTION ELEMENT -------------------------------------------------------------------------
 function createCategoryOptions(categories, selectedCategory = null) {
   return categories.map((category) => {
     const option = document.createElement("option");
@@ -24,52 +21,42 @@ function createCategoryOptions(categories, selectedCategory = null) {
   });
 }
 
-// RENDER CATEGORY OPTIONS IN SELECT IN BUCKETFORM
+// RENDER THE CATEGORY OPTIONS -------------------------------------------------------------------------
 const categoryOptions = createCategoryOptions(categories);
 categoryOptions.forEach((option) => activityCategorySelect.appendChild(option));
 
-// INIT --------------------------------------------------------------------------------------------
-
+// INIT FUNCTION --------------------------------------------------------------------------------------------
 function init() {
-  renderBucketList();
+  renderBucketListToUI();
 }
 
 document.addEventListener("DOMContentLoaded", init);
 
 // HANDLE LOCAL STORAGE ----------------------------------------------------------------------------
+const LIST_KEY = "bucketListInLS"; // Save the name of my list in local storage as a key
+let bucketListFromLS = [];
 
-// Save the name of my list in local storage as a key
-const STORAGE_KEY = "bucketListInLocalStorage";
-
-// Get the list from från local storage
-const bucketListInLocalStorage = JSON.parse(localStorage.getItem(STORAGE_KEY));
-
-// No list i LS? Save a new and add the activity as an object
-function createNewBucketListToLocalStorage() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([activity]));
+// Load list from local storage
+function loadBucketListFromLS(LIST_KEY) {
+  const data = localStorage.getItem(LIST_KEY);
+  return (list = data ? JSON.parse(data) : []);
 }
 
-// Save list to local storage - usefull for updates
-function saveBucketListToLocalStorage() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(bucketListInLocalStorage));
+// Save list to local storage
+function saveBucketListToLS(LIST_KEY, bucketList) {
+  localStorage.setItem(LIST_KEY, JSON.stringify(bucketList));
 }
 
 // Find activity by id in local storage
-function findActivityByIdInLocalStorage(id) {
-  const activityInLocalStorage = bucketListInLocalStorage.find(
-    (activity) => activity.id === id
-  );
-
-  return activityInLocalStorage;
-}
+const findActivityByIdInLS = (id) =>
+  bucketListFromLS.find((activity) => activity.id === id);
 
 // HANDLE CATEGORIES ----------------------------------------------------------------------------
-
-// Group categories
 let groupedCategories = [];
 
+// Group categories
 function updateGroupedCategories() {
-  groupedCategories = bucketListInLocalStorage.reduce((acc, activity) => {
+  groupedCategories = bucketListFromLS.reduce((acc, activity) => {
     // Find the category object in the accumulator
     let categoryObj = acc.find((group) => group.category === activity.category);
 
@@ -86,14 +73,20 @@ function updateGroupedCategories() {
   }, []);
 }
 
-// HANDLE BUCKET LIST AND ACTIVITIES -----------------------------------------------------------------------------
-
-// Render the bucket list dynamically in the DOM
-function renderBucketList() {
+// RENDER BUCKET LIST ---------------------------------------------------------------------------
+function renderBucketListToUI() {
   bucketListsElem.innerHTML = "";
-  updateGroupedCategories();
-  sortActivitiesAlphabetically();
+
+  // Existing list in local storage?
+  bucketListFromLS = loadBucketListFromLS(LIST_KEY);
+
   // Is there a list? Go to:
+  if (bucketListFromLS) {
+    updateGroupedCategories();
+    sortActivitiesAlphabetically;
+  }
+
+  // use the groupedCategory list as a basis for the rendering UI
   if (groupedCategories) {
     groupedCategories.forEach((category) => {
       // Create h2 for every category
@@ -117,6 +110,12 @@ function renderBucketList() {
         newActivityNameElem.textContent = activity.description;
         newListItemElem.appendChild(newActivityNameElem);
 
+        // Display different textdecoration depending on isDone property
+        newActivityNameElem.style.textDecoration = activity.isDone
+          ? "line-through"
+          : "none";
+
+        // Container for the icon-buttons
         const newIconsContainerElem = document.createElement("div");
         newIconsContainerElem.className = "icons-container hovered";
         newListItemElem.appendChild(newIconsContainerElem);
@@ -181,7 +180,7 @@ function renderBucketList() {
 }
 
 // ADD NEW ACTIVITY --------------------------------------------------------------------------
-registerForm.addEventListener("submit", (event) => {
+bucketForm.addEventListener("submit", (event) => {
   event.preventDefault(); // Prevent page reload
   addNewActivityToBucketList();
 });
@@ -198,60 +197,47 @@ function addNewActivityToBucketList() {
     isDone: false,
   };
 
-  // Check if a list excist in local storage
-  if (!bucketListInLocalStorage) {
-    // No list = create a new one
-    createNewBucketListToLocalStorage();
-  } else {
-    // List already excist = push the new activity to that list
-    bucketListInLocalStorage.push(activity);
-    saveBucketListToLocalStorage();
-  }
+  // Add the activity to the array and save to local storage
+  bucketListFromLS.push(activity);
+  saveBucketListToLS(LIST_KEY, bucketListFromLS);
 
   // Reset the form
   activityInput.value = "";
-  activityCategorySelect.value = "--Välj kategori--";
+  activityCategorySelect.value = "";
 
-  renderBucketList();
+  renderBucketListToUI();
 }
 
 // MARK AN ACTIVITY AS DONE -------------------------------------------------------------------
 function markActivityAsDone(id) {
-  const activityToMarkAsDone = findActivityByIdInLocalStorage(id);
+  const activityToMarkAsDone = findActivityByIdInLS(id);
 
-  // Check if isDone are true or false
-  if (activityToMarkAsDone.isDone) {
-    activityToMarkAsDone.isDone = false;
-  } else {
-    activityToMarkAsDone.isDone = true;
-  }
+  // Toggle the isDone property
+  activityToMarkAsDone.isDone = !activityToMarkAsDone.isDone;
 
-  // Save new list in local storage
-  saveBucketListToLocalStorage();
-
-  renderBucketList();
+  // Save new list in local storage and render the updated list to the UI
+  saveBucketListToLS(LIST_KEY, bucketListFromLS);
+  renderBucketListToUI();
 }
 
 // DELETE AN ACTIVITY --------------------------------------------------------------------------
 function deleteActivity(id) {
-  const activityToDelete = findActivityByIdInLocalStorage(id);
+  const activityToDelete = findActivityByIdInLS(id);
 
   // Check the index
-  const indexInLocalStorage =
-    bucketListInLocalStorage.indexOf(activityToDelete);
+  const indexInLS = bucketListFromLS.indexOf(activityToDelete);
 
   // Remove that index from bucket list in local storage
-  bucketListInLocalStorage.splice(indexInLocalStorage, 1);
+  bucketListFromLS.splice(indexInLS, 1);
 
-  // Save new list in local storage
-  saveBucketListToLocalStorage();
-
-  renderBucketList();
+  // Save new list in local storage and render the updated list to the UI
+  saveBucketListToLS(LIST_KEY, bucketListFromLS);
+  renderBucketListToUI();
 }
 
 // OPEN EDIT MODAL --------------------------------------------------------------------------
 function openEditModal(id) {
-  const activityToEdit = findActivityByIdInLocalStorage(id);
+  const activityToEdit = findActivityByIdInLS(id);
 
   // Background overlay
   const modalOverlay = document.createElement("div");
@@ -331,13 +317,13 @@ function openEditModal(id) {
     modalOverlay.remove();
 
     // Rerender the bucketlist
-    renderBucketList();
+    renderBucketListToUI();
   });
 }
 
 // EDIT AN ACTIVITY ------------------------------------------------------------------
 function saveEdit(id, inputText, inputSelect) {
-  const activityToEdit = findActivityByIdInLocalStorage(id);
+  const activityToEdit = findActivityByIdInLS(id);
 
   // Save the input values
   const editInputValue = inputText;
@@ -346,8 +332,8 @@ function saveEdit(id, inputText, inputSelect) {
   const editSelectValue = inputSelect;
   activityToEdit.category = editSelectValue;
 
-  // Update list in LS
-  saveBucketListToLocalStorage();
+  // Save updates to list in local storage
+  saveBucketListToLS(LIST_KEY, bucketListFromLS);
 }
 
 // SORT ACTIVITES ------------------------------------------------------------------------
