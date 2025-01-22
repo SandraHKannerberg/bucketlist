@@ -105,15 +105,61 @@ function renderBucketListToUI() {
         const newListItemElem = document.createElement("li");
         newUlElem.appendChild(newListItemElem);
 
+        // Checkbox to toggle isDone
+        // Checkbox -- Lable
+        const newCheckboxLabelElem = document.createElement("label");
+        newCheckboxLabelElem.className = "visually-hidden";
+        newCheckboxLabelElem.setAttribute("for", `${activity.id}`);
+        newListItemElem.appendChild(newCheckboxLabelElem);
+
+        // Checkbox -- input
+        const newActivityCheckboxElem = document.createElement("input");
+        newActivityCheckboxElem.className = "checkBoxIsDone";
+        newActivityCheckboxElem.setAttribute("type", "checkbox");
+        newActivityCheckboxElem.setAttribute("id", `${activity.id}`);
+        newActivityCheckboxElem.setAttribute(
+          "aria-label",
+          `Klarmarkera aktivitet ${activity.description}`
+        );
+        newActivityCheckboxElem.checked = activity.isDone;
+        newListItemElem.appendChild(newActivityCheckboxElem);
+
         // Description - activity name
         const newActivityNameElem = document.createElement("p");
         newActivityNameElem.textContent = activity.description;
         newListItemElem.appendChild(newActivityNameElem);
 
-        // Display different textdecoration depending on isDone property
+        // Display different css depending on isDone property
         newActivityNameElem.style.textDecoration = activity.isDone
           ? "line-through"
           : "none";
+
+        newActivityNameElem.style.color = activity.isDone
+          ? "#837c7c"
+          : "#3c3d37";
+
+        // MARK AN ACTIVITY AS DONE -------------------------------------------------------------------
+        newActivityCheckboxElem.addEventListener("change", (event) => {
+          const id = event.target.id;
+
+          // Find the id and update isDone value
+          const activityToMarkAsDone = findActivityByIdInLS(id);
+          activityToMarkAsDone.isDone = !activityToMarkAsDone.isDone;
+
+          // Update and save to local storage
+          const index = bucketListFromLS.findIndex((a) => a.id === id);
+          bucketListFromLS.splice(index, 1, activity);
+          saveBucketListToLS(LIST_KEY, bucketListFromLS);
+
+          // Display different css depending on isDone property
+          newActivityNameElem.style.textDecoration = event.target.checked
+            ? "line-through"
+            : "none";
+
+          newActivityNameElem.style.color = event.target.checked
+            ? "gray"
+            : "#3c3d37";
+        });
 
         // Container for the icon-buttons
         const newIconsContainerElem = document.createElement("div");
@@ -123,7 +169,7 @@ function renderBucketListToUI() {
         // Delete button
         const newBtnElemDel = document.createElement("button");
         newIconsContainerElem.appendChild(newBtnElemDel);
-        newBtnElemDel.className = "delBtn";
+        newBtnElemDel.className = "iconBtn delBtn";
         newBtnElemDel.setAttribute("aria-label", "Radera aktiviteten");
 
         // Add trash-can icon to button
@@ -139,7 +185,7 @@ function renderBucketListToUI() {
         // Edit button
         const newBtnElemEdit = document.createElement("button");
         newIconsContainerElem.appendChild(newBtnElemEdit);
-        newBtnElemEdit.className = "editBtn";
+        newBtnElemEdit.className = "iconBtn editBtn";
         newBtnElemEdit.setAttribute("aria-label", "Redigera aktiviteten");
 
         // Add edit icon to button
@@ -147,33 +193,10 @@ function renderBucketListToUI() {
         newIconEditElem.className = "fa-regular fa-pen-to-square";
         newBtnElemEdit.appendChild(newIconEditElem);
 
-        // Eventlistener for mark as done
+        // Eventlistener for open edit modal
         newBtnElemEdit.addEventListener("click", () => {
           openEditModal(activity.id);
         });
-
-        // "Mark as done" button
-        const newBtnElemDone = document.createElement("button");
-        newIconsContainerElem.appendChild(newBtnElemDone);
-        newBtnElemDone.className = "doneBtn";
-        newBtnElemDone.setAttribute(
-          "aria-label",
-          "Markera aktiviteten som klar"
-        );
-
-        // Add icon element to button
-        const newIconDoneElem = document.createElement("i");
-        newBtnElemDone.appendChild(newIconDoneElem);
-
-        // Eventlistener for mark as done
-        newBtnElemDone.addEventListener("click", () => {
-          markActivityAsDone(activity.id);
-        });
-
-        // Display different icons on the button based on the value of isDone
-        newIconDoneElem.className = activity.isDone
-          ? "fa-solid fa-arrow-rotate-left"
-          : "fa fa-check";
       });
     });
   }
@@ -186,7 +209,7 @@ bucketForm.addEventListener("submit", (event) => {
 });
 
 function addNewActivityToBucketList() {
-  // Calculate id of new activity
+  // Create an id
   const id = "id" + Math.random().toString(16).slice(2);
 
   // Save the object
@@ -205,18 +228,6 @@ function addNewActivityToBucketList() {
   activityInput.value = "";
   activityCategorySelect.value = "";
 
-  renderBucketListToUI();
-}
-
-// MARK AN ACTIVITY AS DONE -------------------------------------------------------------------
-function markActivityAsDone(id) {
-  const activityToMarkAsDone = findActivityByIdInLS(id);
-
-  // Toggle the isDone property
-  activityToMarkAsDone.isDone = !activityToMarkAsDone.isDone;
-
-  // Save new list in local storage and render the updated list to the UI
-  saveBucketListToLS(LIST_KEY, bucketListFromLS);
   renderBucketListToUI();
 }
 
@@ -289,7 +300,7 @@ function openEditModal(id) {
   );
   modalCategoryOptions.forEach((option) => categorySelect.appendChild(option));
 
-  // Create a button to be able to close the modal
+  // Button to close the modal
   const closeButton = document.createElement("button");
   closeButton.textContent = "Stäng";
   closeButton.className = "closeBtn";
@@ -299,7 +310,7 @@ function openEditModal(id) {
     modalOverlay.remove();
   });
 
-  // Create save button
+  // Save button
   const saveButton = document.createElement("button");
   saveButton.setAttribute("type", "submit");
   saveButton.textContent = "Spara";
@@ -332,7 +343,9 @@ function saveEdit(id, inputText, inputSelect) {
   const editSelectValue = inputSelect;
   activityToEdit.category = editSelectValue;
 
-  // Save updates to list in local storage
+  // Update and save to local storage
+  const index = bucketListFromLS.findIndex((a) => a.id === id);
+  bucketListFromLS.splice(index, 1, activityToEdit);
   saveBucketListToLS(LIST_KEY, bucketListFromLS);
 }
 
