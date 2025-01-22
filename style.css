@@ -34,6 +34,7 @@
   --xl-font-size: 4rem;
   --lg-font-size: 1.4rem;
   --m-font-size: 1.1rem;
+  --s-font-size: 0.8rem;
 
   /* Space related */
   --base-gap: 1rem;
@@ -91,6 +92,7 @@ main {
   display: flex;
   flex-direction: column;
   gap: var(--xl-gap);
+  min-height: 70vh;
 }
 
 /* BUCKET FORM AND RELATED CONTENT */
@@ -111,7 +113,7 @@ main {
 
 /* BUCKET LIST AND RELATED CONTENT */
 #bucketLists {
-  margin-bottom: var(--xl-gap);
+  margin-top: var(--xl-gap);
   padding-block: var(--xs-gap);
 }
 
@@ -272,6 +274,15 @@ input[type="checkbox"]:checked {
   color: var(--clr-light);
   content: "✔";
   appearance: none;
+}
+
+footer {
+  padding-block: 1rem;
+  text-align: center;
+
+  p > small {
+    font-size: var(--s-font-size);
+  }
 }
 
 /* RESPONSIVE CSS */
