@@ -105,13 +105,6 @@ function renderBucketListToUI() {
         const newListItemElem = document.createElement("li");
         newUlElem.appendChild(newListItemElem);
 
-        // Checkbox to toggle isDone
-        // Checkbox -- Lable
-        // const newCheckboxLabelElem = document.createElement("label");
-        // newCheckboxLabelElem.className = "visually-hidden";
-        // newCheckboxLabelElem.setAttribute("for", `${activity.id}`);
-        // newListItemElem.appendChild(newCheckboxLabelElem);
-
         // Checkbox -- input
         const newActivityCheckboxElem = document.createElement("input");
         newActivityCheckboxElem.className = "checkBoxIsDone";
