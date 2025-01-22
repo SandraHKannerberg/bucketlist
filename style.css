@@ -41,6 +41,7 @@
   --lg-gap: 1.5rem;
   --m-gap: 0.8rem;
   --xs-gap: 0.5em;
+  --mobile-xl-gap: 3rem;
 
   /* Box shadow */
   --btn-box-shadow: 0 4px 6px 0 rgba(242, 231, 231, 0.2),
@@ -271,4 +272,14 @@ input[type="checkbox"]:checked {
   color: var(--clr-light);
   content: "✔";
   appearance: none;
+}
+
+/* RESPONSIVE CSS */
+@media (width <= 600px) {
+  #bucketForm {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--mobile-xl-gap);
+    width: 90vw;
+  }
 }
