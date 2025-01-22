@@ -107,16 +107,17 @@ function renderBucketListToUI() {
 
         // Checkbox to toggle isDone
         // Checkbox -- Lable
-        const newCheckboxLabelElem = document.createElement("label");
-        newCheckboxLabelElem.className = "visually-hidden";
-        newCheckboxLabelElem.setAttribute("for", `${activity.id}`);
-        newListItemElem.appendChild(newCheckboxLabelElem);
+        // const newCheckboxLabelElem = document.createElement("label");
+        // newCheckboxLabelElem.className = "visually-hidden";
+        // newCheckboxLabelElem.setAttribute("for", `${activity.id}`);
+        // newListItemElem.appendChild(newCheckboxLabelElem);
 
         // Checkbox -- input
         const newActivityCheckboxElem = document.createElement("input");
         newActivityCheckboxElem.className = "checkBoxIsDone";
         newActivityCheckboxElem.setAttribute("type", "checkbox");
         newActivityCheckboxElem.setAttribute("id", `${activity.id}`);
+        newActivityCheckboxElem.setAttribute("name", `${activity.id}`);
         newActivityCheckboxElem.setAttribute(
           "aria-label",
           `Klarmarkera aktivitet ${activity.description}`
@@ -170,7 +171,10 @@ function renderBucketListToUI() {
         const newBtnElemDel = document.createElement("button");
         newIconsContainerElem.appendChild(newBtnElemDel);
         newBtnElemDel.className = "iconBtn delBtn";
-        newBtnElemDel.setAttribute("aria-label", "Radera aktiviteten");
+        newBtnElemDel.setAttribute(
+          "aria-label",
+          `Radera aktivitet ${activity.description}`
+        );
 
         // Add trash-can icon to button
         const newIconDelElem = document.createElement("i");
@@ -186,7 +190,10 @@ function renderBucketListToUI() {
         const newBtnElemEdit = document.createElement("button");
         newIconsContainerElem.appendChild(newBtnElemEdit);
         newBtnElemEdit.className = "iconBtn editBtn";
-        newBtnElemEdit.setAttribute("aria-label", "Redigera aktiviteten");
+        newBtnElemEdit.setAttribute(
+          "aria-label",
+          `Redigera aktivitet ${activity.description}`
+        );
 
         // Add edit icon to button
         const newIconEditElem = document.createElement("i");
@@ -256,7 +263,7 @@ function openEditModal(id) {
   bodyElem.appendChild(modalOverlay);
 
   // Create the modal
-  const editModal = document.createElement("div");
+  const editModal = document.createElement("section");
   editModal.className = "editModal";
   modalOverlay.appendChild(editModal);
 
@@ -306,6 +313,35 @@ function openEditModal(id) {
   closeButton.className = "closeBtn";
   editModal.appendChild(closeButton);
 
+  // Trap focus in the modal
+  const focusableElements = editModal.querySelectorAll("input, select, button");
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+
+  firstElement.focus();
+
+  modalOverlay.addEventListener("keydown", (event) => {
+    if (event.key === "Tab") {
+      if (event.shiftKey) {
+        if (document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
+    }
+
+    // Close modal on Escape
+    if (event.key === "Escape") {
+      modalOverlay.remove();
+    }
+  });
+
+  // Close button
   closeButton.addEventListener("click", () => {
     modalOverlay.remove();
   });
